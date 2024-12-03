@@ -1,0 +1,2 @@
+Test text asset.
+This file exists to test Unity functionality during development and should not be used as an example for narrative scripting if present in the final package.
