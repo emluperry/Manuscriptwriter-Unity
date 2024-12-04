@@ -4,10 +4,10 @@ namespace MSW.Scripting
 {
     public class MSWToken
     {
-        private readonly MSWTokenType type;
-        private readonly string lexeme;
-        private readonly object literal;
-        private readonly int line;
+        public readonly MSWTokenType type;
+        public readonly string lexeme;
+        public readonly object literal;
+        public readonly int line;
 
         public MSWToken(MSWTokenType type, string lexeme, object literal, int line)
         {
