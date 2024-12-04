@@ -13,7 +13,7 @@ namespace MSW.Scripting
         // EX: ! (BANG), != (BANG_EQUAL) etc.
 
         // Literals
-        IDENTIFIER, STRING, NUMBER,
+        IDENTIFIER, STRING, DOUBLE,
 
         // Keywords
         TRUE, FALSE, END,
