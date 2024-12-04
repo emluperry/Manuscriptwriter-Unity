@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Search;
 
-namespace MSW.Scripting
+namespace MSW.Scripting.Unity
 {
     public class Actions : MonoBehaviour
     {

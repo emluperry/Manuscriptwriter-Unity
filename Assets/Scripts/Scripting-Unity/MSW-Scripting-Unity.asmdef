@@ -1,6 +1,6 @@
 {
-    "name": "MSW-Scripting",
-    "rootNamespace": "MSW.Scripting",
+    "name": "MSW-Scripting-Unity",
+    "rootNamespace": "MSW.Scripting.Unity",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

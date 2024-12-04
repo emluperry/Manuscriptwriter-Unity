@@ -7,9 +7,11 @@ namespace MSW.Scripting
     {
         private static readonly Dictionary<string, MSWTokenType> keywords = new Dictionary<string, MSWTokenType>()
         {
-            { "End", MSWTokenType.END },
-            { "True", MSWTokenType.TRUE },
-            { "False", MSWTokenType.FALSE }
+            { "end", MSWTokenType.END },
+            { "true", MSWTokenType.TRUE },
+            { "false", MSWTokenType.FALSE },
+            { "not", MSWTokenType.NOT },
+            { "null", MSWTokenType.NULL },
         };
         
         public Action<int, string, string> ReportError;
@@ -38,9 +40,9 @@ namespace MSW.Scripting
 
         private MSWToken ScanToken(string source, ref int startIndex, ref int currentIndex, int finalIndex, ref int line)
         {
-            ++currentIndex;
             char c = this.NextCharacter(source, ref currentIndex);
             string lexeme = "";
+            object literal = null;
 
             MSWTokenType type = MSWTokenType.UNIDENTIFIED;
             switch(c)
@@ -49,19 +51,86 @@ namespace MSW.Scripting
                     type = MSWTokenType.LEFT_PARENTHESIS;
                     lexeme += c;
                     break;
+                case ')':
+                    type = MSWTokenType.RIGHT_PARENTHESIS;
+                    lexeme += c;
+                    break;
+                case '[':
+                    type = MSWTokenType.LEFT_SQUARE;
+                    lexeme += c;
+                    break;
+                case ']':
+                    type = MSWTokenType.RIGHT_SQUARE;
+                    lexeme += c;
+                    break;
+                case ',':
+                    type = MSWTokenType.COMMA;
+                    lexeme += c;
+                    break;
+                case ':':
+                    type = MSWTokenType.COLON;
+                    lexeme += c;
+                    break;
 
-                // Not currently syntax, but this is testing code to make sure I'm understanding everything.
+                case '-':
+                    type = MSWTokenType.MINUS;
+                    lexeme += c;
+                    break;
+                case '+':
+                    type = MSWTokenType.PLUS;
+                    lexeme += c;
+                    break;
+                case '*':
+                    type = MSWTokenType.MULTIPLY;
+                    lexeme += c;
+                    break;
+                case '/':
+                    type = MSWTokenType.LEFT_PARENTHESIS;
+                    lexeme += c;
+                    break;
+
                 case '!':
                     if(CheckNextCharacter(ref currentIndex, finalIndex, source, '='))
                     {
-                        // type is !=
+                        type = MSWTokenType.NOT_EQUAL;
                     }
                     else
                     {
-                        // type is just !
+                        type = MSWTokenType.NOT;
                     }
+                    break;
 
-                    type = MSWTokenType.UNIDENTIFIED;
+                case '=':
+                    if (CheckNextCharacter(ref currentIndex, finalIndex, source, '='))
+                    {
+                        type = MSWTokenType.EQUAL;
+                    }
+                    else
+                    {
+                        type = MSWTokenType.EQUAL;
+                    }
+                    break;
+
+                case '<':
+                    if (CheckNextCharacter(ref currentIndex, finalIndex, source, '='))
+                    {
+                        type = MSWTokenType.LESS_EQUAL;
+                    }
+                    else
+                    {
+                        type = MSWTokenType.LESS;
+                    }
+                    break;
+
+                case '>':
+                    if (CheckNextCharacter(ref currentIndex, finalIndex, source, '='))
+                    {
+                        type = MSWTokenType.GREATER_EQUAL;
+                    }
+                    else
+                    {
+                        type = MSWTokenType.GREATER;
+                    }
                     break;
 
                 case '#': // Remove comments.
@@ -79,9 +148,18 @@ namespace MSW.Scripting
                 case '\n':
                     ++line;
                     break;
+                case '\0':
+                    type = MSWTokenType.EOF;
+                    break;
 
                 default:
-                    if(IsAlphabetic(c))
+                    if(IsDigit(c))
+                    {
+                        type = this.GetDouble(source, ref currentIndex, startIndex, finalIndex, out double d);
+                        literal = d;
+                        lexeme = d.ToString();
+                    }
+                    else if(IsAlphabetic(c))
                     {
                         type = GetIdentifier(source, ref currentIndex, startIndex, finalIndex, out lexeme);
 
@@ -94,26 +172,29 @@ namespace MSW.Scripting
                     break;
             }
 
-            if(lexeme == string.Empty)
+            if(string.IsNullOrEmpty(lexeme))
             {
-                lexeme = source.Substring(startIndex, currentIndex);
+                int length = currentIndex - startIndex;
+                lexeme = source.Substring(startIndex, length);
             }
 
-            return new MSWToken(type, lexeme, null, line);
+            return new MSWToken(type, lexeme, literal, line);
         }
 
         private char PeekNextCharacter(string source, int currentIndex, int finalIndex)
         {
-            if (currentIndex + 1 >= finalIndex)
+            if (currentIndex >= finalIndex)
             {
                 return '\0';
             }
-            return source[currentIndex + 1];
+            return source[currentIndex];
         }
 
         private char NextCharacter(string source, ref int currentIndex)
         {
-            return source[++currentIndex];
+            var output = source[currentIndex];
+            ++currentIndex;
+            return output;
         }
 
         private bool CheckNextCharacter(ref int currentIndex, int finalIndex, string source, char expectedCharacter)
@@ -148,10 +229,11 @@ namespace MSW.Scripting
                 NextCharacter(source, ref currentIndex);
             }
 
-            return source.Substring(startIndex + 1, currentIndex - 1);
+            int length = (currentIndex - 1) - (startIndex + 1);
+            return source.Substring(startIndex + 1, length);
         }
 
-        private double GetDouble(string source, ref int currentIndex, int startIndex, int finalIndex)
+        private MSWTokenType GetDouble(string source, ref int currentIndex, int startIndex, int finalIndex, out double value)
         {
             char nextCharacter = PeekNextCharacter(source, currentIndex, finalIndex);
             while (IsDigit(nextCharacter) && currentIndex + 1 < finalIndex)
@@ -174,13 +256,16 @@ namespace MSW.Scripting
                 }
             }
 
-            string str = source.Substring(startIndex, currentIndex);
+            int length = currentIndex - startIndex;
+            string str = source.Substring(startIndex, length);
             if(Double.TryParse(str, out double result))
             {
-                return result;
+                value = result;
+                return MSWTokenType.DOUBLE;
             }
 
-            return 0;
+            value = 0;
+            return MSWTokenType.UNIDENTIFIED;
         }
 
         private MSWTokenType GetIdentifier(string source, ref int currentIndex, int startIndex, int finalIndex, out string value)
@@ -190,7 +275,8 @@ namespace MSW.Scripting
                 NextCharacter(source, ref currentIndex);
             }
 
-            string identifier = source.Substring(startIndex, currentIndex);
+            int length = currentIndex - startIndex;
+            string identifier = source.Substring(startIndex, length).ToLowerInvariant();
             MSWTokenType type = MSWTokenType.IDENTIFIER;
             if (keywords.TryGetValue(identifier, out MSWTokenType retrievedType)) 
             {

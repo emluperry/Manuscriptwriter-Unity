@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace MSW.Scripting
 {
     public class MSWToken

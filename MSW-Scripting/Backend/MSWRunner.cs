@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace MSW.Scripting
 {
     public class MSWRunner
     {
+        public Action<string> ErrorLogger;
+        public Action<string> DebugOutput;
+
         private bool hasError = false;
         public void Run(string source)
         {
@@ -22,13 +24,15 @@ namespace MSW.Scripting
                 return;
             }
 
-            MSWInterpreter interpreter = new MSWInterpreter();
-            interpreter.Interpret(expression);
+            MSWInterpreter interpreter = new MSWInterpreter() { ReportRuntimeError = ReportRuntimeError };
+            object value = interpreter.Interpret(expression);
 
             if(hasError)
             {
                 return;
             }
+
+            DebugOutput?.Invoke(value?.ToString() ?? "Null");
         }
 
         private void ReportTokenError(MSWToken token, string message)
@@ -58,7 +62,7 @@ namespace MSW.Scripting
 
         private void Report(int line, string where, string message)
         {
-            Debug.Log($"[Line {line} - {where}]: {message}");
+            ErrorLogger?.Invoke($"[Line {line} - {where}]: {message}");
         }
     }
 }

@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace MSW.Scripting
 {
     public abstract class Expression

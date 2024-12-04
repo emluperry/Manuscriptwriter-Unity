@@ -1,17 +1,23 @@
+using System;
+
 namespace MSW.Scripting
 {
-    public partial class MSWInterpreter : IMSWVisitor
+    public class MSWInterpreter : IMSWVisitor
     {
-        public void Interpret(Expression expression)
+        public Action<MSWRuntimeException> ReportRuntimeError;
+
+        public object Interpret(Expression expression)
         {
             try
             {
-                object value = this.Evaluate(expression);
+                return this.Evaluate(expression);
             }
             catch(MSWRuntimeException e)
             {
 
             }
+
+            return "Failed to run interpretation.";
         }
 
         private object Evaluate(Expression expr)
@@ -48,8 +54,8 @@ namespace MSW.Scripting
 
             return a.Equals(b);
         }
-
-#region ERRORS + VALIDATION
+        
+        #region ERRORS + VALIDATION
 
         private void ValidateNumberOperand(MSWToken op, object operand)
         {
