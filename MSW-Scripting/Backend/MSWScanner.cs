@@ -236,7 +236,7 @@ namespace MSW.Scripting
         private MSWTokenType GetDouble(string source, ref int currentIndex, int startIndex, int finalIndex, out double value)
         {
             char nextCharacter = PeekNextCharacter(source, currentIndex, finalIndex);
-            while (IsDigit(nextCharacter) && currentIndex + 1 < finalIndex)
+            while (IsDigit(nextCharacter) && currentIndex < finalIndex)
             {
                 NextCharacter(source, ref currentIndex);
 
@@ -248,7 +248,7 @@ namespace MSW.Scripting
                 NextCharacter(source, ref currentIndex);
                 nextCharacter = PeekNextCharacter(source, currentIndex, finalIndex);
 
-                while (IsDigit(nextCharacter) && currentIndex + 1 < finalIndex)
+                while (IsDigit(nextCharacter) && currentIndex < finalIndex)
                 {
                     NextCharacter(source, ref currentIndex);
 

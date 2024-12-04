@@ -30,7 +30,7 @@ namespace MSW.Scripting
         private MSWToken NextToken(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
             var token = tokens[currentIndex];
-            if(currentIndex >= finalIndex)
+            if(currentIndex < finalIndex)
             {
                 ++currentIndex;
             }
@@ -38,19 +38,19 @@ namespace MSW.Scripting
             return token;
         }
 
-        private MSWToken PeekNextToken(List<MSWToken> tokens, int currentIndex, int finalIndex)
+        private MSWToken PeekToken(List<MSWToken> tokens, int currentIndex, int finalIndex)
         {
-            if (currentIndex + 1 >= finalIndex)
+            if (currentIndex >= finalIndex)
             {
                 return null;
             }
 
-            return tokens[currentIndex + 1];
+            return tokens[currentIndex];
         }
 
         private MSWToken PeekPreviousToken(List<MSWToken> tokens, int currentIndex)
         {
-            if(currentIndex - 1 <= 0)
+            if(currentIndex - 1 < 0)
             {
                 return null;
             }
@@ -58,11 +58,11 @@ namespace MSW.Scripting
             return tokens[currentIndex - 1];
         }
 
-        private bool NextIsOneOfTypes(List<MSWTokenType> tokenTypes, List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private bool IsOneOfTypes(List<MSWTokenType> tokenTypes, List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
             foreach (MSWTokenType tokenType in tokenTypes)
             { 
-                if(this.NextIsType(tokenType, tokens, currentIndex, finalIndex))
+                if(this.IsOfType(tokenType, tokens, currentIndex, finalIndex))
                 {
                     this.NextToken(tokens, ref currentIndex, finalIndex);
                     return true;
@@ -72,24 +72,24 @@ namespace MSW.Scripting
             return false;
         }
 
-        private bool NextIsType(MSWTokenType tokenType, List<MSWToken> tokens, int currentIndex, int finalIndex)
+        private bool IsOfType(MSWTokenType tokenType, List<MSWToken> tokens, int currentIndex, int finalIndex)
         {
             if(currentIndex >= finalIndex)
             {
                 return false;
             }
 
-            return PeekNextToken(tokens, currentIndex, finalIndex).type == tokenType;
+            return PeekToken(tokens, currentIndex, finalIndex).type == tokenType;
         }
 
         private MSWToken ConsumeToken(MSWTokenType type, string message, List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
-            if(this.NextIsType(type, tokens, currentIndex, finalIndex))
+            if(this.IsOfType(type, tokens, currentIndex, finalIndex))
             {
                 return this.NextToken(tokens, ref currentIndex, finalIndex);
             }
 
-            throw this.ParseError(this.PeekNextToken(tokens, currentIndex, finalIndex), message);
+            throw this.ParseError(this.PeekToken(tokens, currentIndex, finalIndex), message);
         }
 
         #region ERROR HANDLING
@@ -106,12 +106,12 @@ namespace MSW.Scripting
 
             while(currentIndex < finalIndex)
             {
-                if(this.PeekPreviousToken(tokens, currentIndex).type == MSWTokenType.EOL)
+                if(this.PeekToken(tokens, currentIndex, finalIndex).type == MSWTokenType.EOL)
                 {
                     return;
                 }
 
-                switch(this.PeekNextToken(tokens, currentIndex, finalIndex).type)
+                switch(this.PeekToken(tokens, currentIndex, finalIndex).type)
                 {
                     case MSWTokenType.END:
                         return;
@@ -131,7 +131,7 @@ namespace MSW.Scripting
         {
             Expression expression = this.Comparison(tokens, ref currentIndex, finalIndex);
 
-            while(this.NextIsOneOfTypes(new List<MSWTokenType> { MSWTokenType.NOT_EQUAL, MSWTokenType.EQUAL }, tokens, ref currentIndex, finalIndex))
+            while(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.NOT_EQUAL, MSWTokenType.EQUAL }, tokens, ref currentIndex, finalIndex))
             {
                 MSWToken op = this.PeekPreviousToken(tokens, currentIndex);
                 Expression right = this.Comparison(tokens, ref currentIndex, finalIndex);
@@ -145,7 +145,7 @@ namespace MSW.Scripting
         {
             Expression expression = this.Term(tokens, ref currentIndex, finalIndex);
 
-            while(this.NextIsOneOfTypes(new List<MSWTokenType> { MSWTokenType.GREATER, MSWTokenType.GREATER_EQUAL, MSWTokenType.LESS, MSWTokenType.LESS_EQUAL}, tokens, ref currentIndex, finalIndex))
+            while(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.GREATER, MSWTokenType.GREATER_EQUAL, MSWTokenType.LESS, MSWTokenType.LESS_EQUAL}, tokens, ref currentIndex, finalIndex))
             {
                 MSWToken op = this.PeekPreviousToken(tokens, currentIndex);
                 Expression right = this.Term(tokens, ref currentIndex, finalIndex);
@@ -159,7 +159,7 @@ namespace MSW.Scripting
         {
             Expression expression = this.Factor(tokens, ref currentIndex, finalIndex);
 
-            while(this.NextIsOneOfTypes(new List<MSWTokenType> { MSWTokenType.MINUS, MSWTokenType.PLUS }, tokens, ref currentIndex, finalIndex))
+            while(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.MINUS, MSWTokenType.PLUS }, tokens, ref currentIndex, finalIndex))
             {
                 MSWToken op = this.PeekPreviousToken(tokens, currentIndex);
                 Expression right = this.Factor(tokens, ref currentIndex, finalIndex);
@@ -173,7 +173,7 @@ namespace MSW.Scripting
         {
             Expression expression = this.Unary(tokens, ref currentIndex, finalIndex);
 
-            while(this.NextIsOneOfTypes(new List<MSWTokenType> { MSWTokenType.MULTIPLY, MSWTokenType.DIVIDE }, tokens, ref currentIndex, finalIndex))
+            while(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.MULTIPLY, MSWTokenType.DIVIDE }, tokens, ref currentIndex, finalIndex))
             {
                 MSWToken op = this.PeekPreviousToken(tokens, currentIndex);
                 Expression right = this.Unary(tokens, ref currentIndex, finalIndex);
@@ -185,7 +185,7 @@ namespace MSW.Scripting
 
         private Expression Unary(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
-            if(this.NextIsOneOfTypes(new List<MSWTokenType> { MSWTokenType.NOT, MSWTokenType.MINUS }, tokens, ref currentIndex, finalIndex))
+            if(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.NOT, MSWTokenType.MINUS }, tokens, ref currentIndex, finalIndex))
             {
                 MSWToken op = this.PeekPreviousToken(tokens, currentIndex);
                 Expression right = this.Unary(tokens, ref currentIndex, finalIndex);
@@ -197,32 +197,32 @@ namespace MSW.Scripting
 
         private Expression Primary(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
-            if(this.NextIsOneOfTypes(new List<MSWTokenType> { MSWTokenType.FALSE }, tokens, ref currentIndex, finalIndex))
+            if(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.FALSE }, tokens, ref currentIndex, finalIndex))
             {
                 return new Literal(false);
             }
-            if (this.NextIsOneOfTypes(new List<MSWTokenType> { MSWTokenType.TRUE }, tokens, ref currentIndex, finalIndex))
+            if (this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.TRUE }, tokens, ref currentIndex, finalIndex))
             {
                 return new Literal(true);
             }
-            if (this.NextIsOneOfTypes(new List<MSWTokenType> { MSWTokenType.NULL }, tokens, ref currentIndex, finalIndex))
+            if (this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.NULL }, tokens, ref currentIndex, finalIndex))
             {
                 return new Literal(null);
             }
 
-            if (this.NextIsOneOfTypes(new List<MSWTokenType> { MSWTokenType.STRING, MSWTokenType.DOUBLE }, tokens, ref currentIndex, finalIndex))
+            if (this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.STRING, MSWTokenType.DOUBLE }, tokens, ref currentIndex, finalIndex))
             {
                 return new Literal(this.PeekPreviousToken(tokens, currentIndex).literal);
             }
 
-            if (this.NextIsOneOfTypes(new List<MSWTokenType> { MSWTokenType.LEFT_PARENTHESIS }, tokens, ref currentIndex, finalIndex))
+            if (this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.LEFT_PARENTHESIS }, tokens, ref currentIndex, finalIndex))
             {
                 Expression expression = this.Expression(tokens, ref currentIndex, finalIndex);
                 this.ConsumeToken(MSWTokenType.RIGHT_PARENTHESIS, "Expect ')' after expression.", tokens, ref currentIndex, finalIndex);
                 return new Grouping(expression);
             }
 
-            throw ParseError(this.PeekNextToken(tokens, currentIndex, finalIndex), "Expect expression.");
+            throw ParseError(this.PeekToken(tokens, currentIndex, finalIndex), "Expect expression.");
         }
     }
 }
