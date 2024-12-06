@@ -345,7 +345,7 @@ namespace MSW.Scripting
                 initialiser = this.Expression(tokens, ref currentIndex, finalIndex);
             }
 
-            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after variable declaration.", tokens, ref currentIndex, finalIndex);
+            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.COMMA, MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after variable declaration.", tokens, ref currentIndex, finalIndex);
             return new VarDeclaration(token, initialiser);
         }
 
@@ -354,6 +354,11 @@ namespace MSW.Scripting
             if (this.IsOfType(MSWTokenType.EOL, tokens, currentIndex, finalIndex))
             {
                 this.PopToken(tokens, ref currentIndex, finalIndex);
+            }
+
+            if (this.IsOfType(MSWTokenType.FOR, tokens, currentIndex, finalIndex))
+            {
+                return this.ForStatement(tokens, ref currentIndex, finalIndex);
             }
 
             if (this.IsOfType(MSWTokenType.IF, tokens, currentIndex, finalIndex))
@@ -390,7 +395,7 @@ namespace MSW.Scripting
         private Statement ExpressionStatement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
             Expression value = this.Expression(tokens, ref currentIndex, finalIndex);
-            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.", tokens, ref currentIndex, finalIndex);
+            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.COMMA, MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.", tokens, ref currentIndex, finalIndex);
             return new StatementExpression(value);
         }
 
@@ -443,6 +448,48 @@ namespace MSW.Scripting
             Statement statement = this.Statement(tokens, ref currentIndex, finalIndex);
 
             return new While(condition, statement);
+        }
+
+        private Statement ForStatement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            this.PopToken(tokens, ref currentIndex, finalIndex);
+
+            Statement initialiser;
+            if(this.IsOfType(MSWTokenType.VAR, tokens, currentIndex, finalIndex))
+            {
+                initialiser = this.VarDeclaration(tokens, ref currentIndex, finalIndex);
+            }
+            else
+            {
+                this.PopToken(tokens, ref currentIndex, finalIndex);
+                initialiser = this.ExpressionStatement(tokens, ref currentIndex, finalIndex);
+            }
+
+            Expression condition = this.Expression(tokens, ref currentIndex, finalIndex);
+            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after loop condition.", tokens, ref currentIndex, finalIndex);
+
+            Expression increment = this.Expression(tokens, ref currentIndex, finalIndex);
+            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after loop increment.", tokens, ref currentIndex, finalIndex);
+
+            Statement body = this.Statement(tokens, ref currentIndex, finalIndex);
+
+            if(increment != null)
+            {
+                body = new Block(new List<Statement>() { body, new StatementExpression(increment) });
+            }
+
+            if(condition == null)
+            {
+                condition = new Literal(true);
+            }
+            body = new While(condition, body);
+
+            if(initialiser != null)
+            {
+                body = new Block(new List<Statement>() { initialiser, body });
+            }
+
+            return body;
         }
 
         #endregion
