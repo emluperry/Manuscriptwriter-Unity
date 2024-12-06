@@ -197,6 +197,28 @@ namespace MSW.Scripting
 
             return null;
         }
+
+        public object VisitLogical(Logical visitor)
+        {
+            object left = this.Evaluate(visitor.left);
+
+            if(visitor.op.type == MSWTokenType.OR)
+            {
+                if(this.IsTrue(left))
+                {
+                    return left;
+                }
+            }
+            else
+            {
+                if(!this.IsTrue(left))
+                {
+                    return left;
+                }
+            }
+
+            return this.Evaluate(visitor.right);
+        }
         #endregion
 
         #region STATEMENT VISITORS
@@ -228,6 +250,20 @@ namespace MSW.Scripting
         public object VisitBlock(Block visitor)
         {
             this.ExecuteBlock(visitor.statements, new Environment(environment));
+            return null;
+        }
+
+        public object VisitIfBlock(If visitor)
+        {
+            if(this.IsTrue(this.Evaluate(visitor.condition)))
+            {
+                this.Execute(visitor.thenBranch);
+            }
+            else if(visitor.elseBranch != null)
+            {
+                this.Execute(visitor.elseBranch);
+            }
+
             return null;
         }
         #endregion

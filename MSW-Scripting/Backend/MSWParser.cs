@@ -36,7 +36,7 @@ namespace MSW.Scripting
             return statements;
         }
 
-        private MSWToken NextToken(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private MSWToken PopToken(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
             var token = tokens[currentIndex];
             if(currentIndex < finalIndex)
@@ -73,7 +73,7 @@ namespace MSW.Scripting
             { 
                 if(this.IsOfType(tokenType, tokens, currentIndex, finalIndex))
                 {
-                    this.NextToken(tokens, ref currentIndex, finalIndex);
+                    this.PopToken(tokens, ref currentIndex, finalIndex);
                     return true;
                 }
             }
@@ -95,7 +95,7 @@ namespace MSW.Scripting
         {
             if(this.IsOfType(type, tokens, currentIndex, finalIndex))
             {
-                return this.NextToken(tokens, ref currentIndex, finalIndex);
+                return this.PopToken(tokens, ref currentIndex, finalIndex);
             }
 
             throw this.ParseError(this.PeekToken(tokens, currentIndex, finalIndex), message);
@@ -107,7 +107,7 @@ namespace MSW.Scripting
             {
                 if (this.IsOfType(tokenType, tokens, currentIndex, finalIndex))
                 {
-                    return this.NextToken(tokens, ref currentIndex, finalIndex);
+                    return this.PopToken(tokens, ref currentIndex, finalIndex);
                 }
             }
 
@@ -124,7 +124,7 @@ namespace MSW.Scripting
 
         private void Synchronise(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
-            this.NextToken(tokens, ref currentIndex, finalIndex);
+            this.PopToken(tokens, ref currentIndex, finalIndex);
 
             while(currentIndex < finalIndex)
             {
@@ -132,13 +132,13 @@ namespace MSW.Scripting
                 {
                     case MSWTokenType.END:
                     case MSWTokenType.EOL:
-                        this.NextToken(tokens, ref currentIndex, finalIndex);
+                        this.PopToken(tokens, ref currentIndex, finalIndex);
                         return;
                     case MSWTokenType.EOF:
                         return;
                 }
 
-                this.NextToken(tokens, ref currentIndex, finalIndex);
+                this.PopToken(tokens, ref currentIndex, finalIndex);
             }
         }
         #endregion
@@ -165,6 +165,34 @@ namespace MSW.Scripting
                 }
 
                 this.ParseError(equals, "Invalid assignment target.");
+            }
+
+            return expression;
+        }
+
+        private Expression Or(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            Expression expression = this.And(tokens, ref currentIndex, finalIndex);
+
+            while(this.IsOfType(MSWTokenType.OR, tokens, currentIndex, finalIndex))
+            {
+                MSWToken op = this.PopToken(tokens, ref currentIndex, finalIndex);
+                Expression right = this.And(tokens, ref currentIndex, finalIndex);
+                expression = new Logical(expression, op, right);
+            }
+
+            return expression;
+        }
+
+        private Expression And(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            Expression expression = this.Equality(tokens, ref currentIndex, finalIndex);
+
+            while (this.IsOfType(MSWTokenType.AND, tokens, currentIndex, finalIndex))
+            {
+                MSWToken op = this.PopToken(tokens, ref currentIndex, finalIndex);
+                Expression right = this.Equality(tokens, ref currentIndex, finalIndex);
+                expression = new Logical(expression, op, right);
             }
 
             return expression;
@@ -297,13 +325,13 @@ namespace MSW.Scripting
 
         private Statement VarDeclaration(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
-            this.NextToken(tokens, ref currentIndex, finalIndex);
+            this.PopToken(tokens, ref currentIndex, finalIndex);
             MSWToken token = this.ConsumeToken(MSWTokenType.IDENTIFIER, "Expect variable name.", tokens, ref currentIndex, finalIndex);
 
             Expression initialiser = null;
             if (this.IsOfType(MSWTokenType.EQUAL, tokens, currentIndex, finalIndex))
             {
-                this.NextToken(tokens, ref currentIndex, finalIndex);
+                this.PopToken(tokens, ref currentIndex, finalIndex);
                 initialiser = this.Expression(tokens, ref currentIndex, finalIndex);
             }
 
@@ -313,6 +341,11 @@ namespace MSW.Scripting
 
         private Statement Statement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
+            if (this.IsOfType(MSWTokenType.IF, tokens, currentIndex, finalIndex))
+            {
+                return this.IfStatement(tokens, ref currentIndex, finalIndex);
+            }
+
             if (this.IsOfType(MSWTokenType.PRINT, tokens, currentIndex, finalIndex))
             {
                 return this.PrintStatement(tokens, ref currentIndex, finalIndex);
@@ -328,7 +361,7 @@ namespace MSW.Scripting
 
         private Statement PrintStatement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
-            this.NextToken(tokens, ref currentIndex, finalIndex);
+            this.PopToken(tokens, ref currentIndex, finalIndex);
             Expression value = this.Expression(tokens, ref currentIndex, finalIndex);
             this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.", tokens, ref currentIndex, finalIndex);
             return new Print(value);
@@ -343,8 +376,8 @@ namespace MSW.Scripting
 
         private List<Statement> Block(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
-            this.NextToken(tokens, ref currentIndex, finalIndex);
-            this.NextToken(tokens, ref currentIndex, finalIndex);
+            this.PopToken(tokens, ref currentIndex, finalIndex);
+            this.PopToken(tokens, ref currentIndex, finalIndex);
 
             List<Statement> statements = new List<Statement>();
 
@@ -355,6 +388,25 @@ namespace MSW.Scripting
 
             this.ConsumeToken(MSWTokenType.END, "Expect END after block.", tokens, ref currentIndex, finalIndex);
             return statements;
+        }
+
+        private Statement IfStatement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            this.PopToken(tokens, ref currentIndex, finalIndex);
+
+            Expression condition = this.Expression(tokens, ref currentIndex, finalIndex);
+
+            this.ConsumeToken(MSWTokenType.EOL, "Expect end of line after if condition.", tokens, ref currentIndex, finalIndex);
+
+            Statement thenBranch = this.Statement(tokens, ref currentIndex, finalIndex);
+            Statement elseBranch = null;
+            if(this.IsOfType(MSWTokenType.ELSE, tokens, currentIndex, finalIndex))
+            {
+                this.PopToken(tokens, ref currentIndex, finalIndex);
+                elseBranch = this.Statement(tokens, ref currentIndex, finalIndex);
+            }
+
+            return new If(condition, thenBranch, elseBranch);
         }
 
         #endregion

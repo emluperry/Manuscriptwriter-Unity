@@ -24,8 +24,13 @@ namespace MSW.Scripting
         
         // Functions
         PRINT,
+
+        // Conditionals
+        IF, ELSE, WHEN,
+
+        AND, OR,
         
-        // Start and end blocks - WIP
+        // Start and end blocks
         START, END,
 
         EOF, EOL, UNIDENTIFIED

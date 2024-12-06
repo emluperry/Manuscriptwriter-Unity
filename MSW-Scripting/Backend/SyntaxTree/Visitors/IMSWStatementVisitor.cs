@@ -8,5 +8,7 @@
         object VisitVar(VarDeclaration visitor);
 
         object VisitBlock(Block visitor);
+
+        object VisitIfBlock(If visitor);
     }
 }

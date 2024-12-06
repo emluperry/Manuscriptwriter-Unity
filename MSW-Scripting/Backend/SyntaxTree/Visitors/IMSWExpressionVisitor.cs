@@ -9,5 +9,6 @@ namespace MSW.Scripting
 
         object VisitVariable(Variable visitor);
         object VisitAssignment(Assign visitor);
+        object VisitLogical(Logical visitor);
     }
 }
