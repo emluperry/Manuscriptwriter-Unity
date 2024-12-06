@@ -266,6 +266,16 @@ namespace MSW.Scripting
 
             return null;
         }
+
+        public object VisitWhileBlock(While visitor)
+        {
+            while(this.IsTrue(this.Evaluate(visitor.condition)))
+            {
+                this.Execute(visitor.statement);
+            }
+
+            return null;
+        }
         #endregion
     }
 }

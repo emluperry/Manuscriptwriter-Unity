@@ -18,6 +18,7 @@ namespace MSW.Scripting
             { "var", MSWTokenType.VAR },
             { "if", MSWTokenType.IF },
             { "when", MSWTokenType.WHEN },
+            { "while", MSWTokenType.WHILE },
             { "else", MSWTokenType.ELSE },
             { "otherwise", MSWTokenType.ELSE },
             { "and", MSWTokenType.AND },

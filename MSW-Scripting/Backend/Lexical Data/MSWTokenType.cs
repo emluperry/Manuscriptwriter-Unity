@@ -27,6 +27,7 @@ namespace MSW.Scripting
 
         // Conditionals
         IF, ELSE, WHEN,
+        WHILE,
 
         AND, OR,
         
