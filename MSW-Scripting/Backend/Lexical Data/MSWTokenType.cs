@@ -15,8 +15,15 @@ namespace MSW.Scripting
         // Literals
         IDENTIFIER, STRING, DOUBLE,
 
-        // Keywords
+        // -- Keywords
+        // Values
         TRUE, FALSE, NULL,
+
+        // Declarations
+        VAR,
+        
+        // Functions
+        PRINT,
         
         END,
 

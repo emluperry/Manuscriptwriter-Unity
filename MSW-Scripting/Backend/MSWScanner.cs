@@ -12,6 +12,8 @@ namespace MSW.Scripting
             { "false", MSWTokenType.FALSE },
             { "not", MSWTokenType.NOT },
             { "null", MSWTokenType.NULL },
+            { "print", MSWTokenType.PRINT },
+            { "var", MSWTokenType.VAR },
         };
         
         public Action<int, string, string> ReportError;
@@ -31,10 +33,15 @@ namespace MSW.Scripting
             while (currentIndex < finalIndex)
             {
                 startIndex = currentIndex;
-                tokens.Add(ScanToken(source, ref startIndex, ref currentIndex, finalIndex, ref line));
+                var token = ScanToken(source, ref startIndex, ref currentIndex, finalIndex, ref line);
+
+                if(token.type != MSWTokenType.UNIDENTIFIED)
+                {
+                    tokens.Add(token);
+                }
             }
 
-            tokens.Add(new MSWToken(MSWTokenType.EOF, "", null, 0));
+            tokens.Add(new MSWToken(MSWTokenType.EOF, "", null, line));
             return tokens;
         }
 
@@ -134,10 +141,12 @@ namespace MSW.Scripting
                     break;
 
                 case '#': // Remove comments.
-                    while (this.PeekNextCharacter(source, currentIndex, finalIndex) != '\n' && currentIndex + 1 < finalIndex)
+                    while (currentIndex < finalIndex && this.PeekNextCharacter(source, currentIndex, finalIndex) != '\n')
                     {
                         this.NextCharacter(source, ref currentIndex);
                     }
+
+                    this.NextCharacter(source, ref currentIndex); // skip past the EOL
                     break;
 
                 case ' ': // Ignore whitespace
@@ -147,6 +156,7 @@ namespace MSW.Scripting
 
                 case '\n':
                     ++line;
+                    type = MSWTokenType.EOL;
                     break;
                 case '\0':
                     type = MSWTokenType.EOF;

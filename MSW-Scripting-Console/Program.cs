@@ -13,8 +13,12 @@ namespace MSW.Scripting.Console
                 return;
             }
 
+            // Output the file for debugging.
             System.Console.WriteLine(data);
 
+            System.Console.WriteLine("///////////////////////////////// OUTPUT FOLLOWS ////////////////////////////////");
+
+            // Run the debug code.
             var runner = new MSWRunner() { ErrorLogger = Program.LogError, DebugOutput = Program.LogError };
             runner.Run(data);
         }

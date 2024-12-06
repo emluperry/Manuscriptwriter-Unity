@@ -1,1 +1,5 @@
-10*10 # COMMENT HERE!
+print 10*10
+# COMMENT HERE!
+var a = 20
+var b = 5
+print a + b

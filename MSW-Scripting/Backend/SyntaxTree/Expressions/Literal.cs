@@ -8,7 +8,7 @@ namespace MSW.Scripting
             this.literal = literal;
         }
 
-        public override object Accept(IMSWVisitor visitor)
+        public override object Accept(IMSWExpressionVisitor visitor)
         {
             return visitor.VisitLiteral(this);
         }

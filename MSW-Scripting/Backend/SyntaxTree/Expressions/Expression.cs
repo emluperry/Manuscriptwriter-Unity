@@ -2,6 +2,6 @@ namespace MSW.Scripting
 {
     public abstract class Expression
     {
-        public abstract object Accept(IMSWVisitor visitor);
+        public abstract object Accept(IMSWExpressionVisitor visitor);
     }
 }

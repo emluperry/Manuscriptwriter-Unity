@@ -17,7 +17,7 @@ namespace MSW.Scripting
             List<MSWToken> tokens = scanner.ScanTokens(source);
 
             MSWParser parser = new MSWParser() { ReportTokenError = ReportTokenError };
-            Expression expression = parser.Parse(tokens);
+            List<Statement> statements = parser.Parse(tokens);
 
             if(hasError)
             {
@@ -25,20 +25,13 @@ namespace MSW.Scripting
             }
 
             MSWInterpreter interpreter = new MSWInterpreter() { ReportRuntimeError = ReportRuntimeError };
-            object value = interpreter.Interpret(expression);
-
-            if(hasError)
-            {
-                return;
-            }
-
-            DebugOutput?.Invoke(value?.ToString() ?? "Null");
+            interpreter.Interpret(statements);
         }
 
         private void ReportTokenError(MSWToken token, string message)
         {
             hasError = true;
-            if(token.type == MSWTokenType.EOF)
+            if(token?.type == MSWTokenType.EOF)
             {
                 Report(token.line, "at end", message);
             }

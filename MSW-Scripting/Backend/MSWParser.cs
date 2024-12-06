@@ -12,19 +12,28 @@ namespace MSW.Scripting
 
         }
 
-        public Expression Parse(List<MSWToken> tokens)
+        public List<Statement> Parse(List<MSWToken> tokens)
         {
             int finalIndex = tokens.Count;
             int currentIndex = 0;
 
-            try
+            List<Statement> statements = new List<Statement>();
+            while(currentIndex < finalIndex)
             {
-                return this.Expression(tokens, ref currentIndex, finalIndex);
+                if (this.IsOfType(MSWTokenType.EOF, tokens, currentIndex, finalIndex))
+                {
+                    break;
+                }
+
+                var s = this.Declaration(tokens, ref currentIndex, finalIndex);
+
+                if(s != null)
+                {
+                    statements.Add(s);
+                }
             }
-            catch(MSWParseException e)
-            {
-                return null;
-            }
+
+            return statements;
         }
 
         private MSWToken NextToken(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
@@ -92,6 +101,19 @@ namespace MSW.Scripting
             throw this.ParseError(this.PeekToken(tokens, currentIndex, finalIndex), message);
         }
 
+        private MSWToken ConsumeOneOfTokens(List<MSWTokenType> types, string message, List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            foreach (MSWTokenType tokenType in types)
+            {
+                if (this.IsOfType(tokenType, tokens, currentIndex, finalIndex))
+                {
+                    return this.NextToken(tokens, ref currentIndex, finalIndex);
+                }
+            }
+
+            throw this.ParseError(this.PeekToken(tokens, currentIndex, finalIndex), message);
+        }
+
         #region ERROR HANDLING
         private MSWParseException ParseError(MSWToken token, string message)
         {
@@ -106,14 +128,13 @@ namespace MSW.Scripting
 
             while(currentIndex < finalIndex)
             {
-                if(this.PeekToken(tokens, currentIndex, finalIndex).type == MSWTokenType.EOL)
-                {
-                    return;
-                }
-
                 switch(this.PeekToken(tokens, currentIndex, finalIndex).type)
                 {
                     case MSWTokenType.END:
+                    case MSWTokenType.EOL:
+                        this.NextToken(tokens, ref currentIndex, finalIndex);
+                        return;
+                    case MSWTokenType.EOF:
                         return;
                 }
 
@@ -122,6 +143,7 @@ namespace MSW.Scripting
         }
         #endregion
 
+        #region EXPRESSIONS
         private Expression Expression(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
             return this.Equality(tokens, ref currentIndex, finalIndex);
@@ -215,6 +237,11 @@ namespace MSW.Scripting
                 return new Literal(this.PeekPreviousToken(tokens, currentIndex).literal);
             }
 
+            if(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.IDENTIFIER }, tokens, ref currentIndex, finalIndex))
+            {
+                return new Variable(this.PeekPreviousToken(tokens, currentIndex));
+            }
+
             if (this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.LEFT_PARENTHESIS }, tokens, ref currentIndex, finalIndex))
             {
                 Expression expression = this.Expression(tokens, ref currentIndex, finalIndex);
@@ -224,5 +251,70 @@ namespace MSW.Scripting
 
             throw ParseError(this.PeekToken(tokens, currentIndex, finalIndex), "Expect expression.");
         }
+
+        #endregion
+
+        #region STATEMENTS
+
+        private Statement Declaration(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            try
+            {
+                if(this.IsOfType(MSWTokenType.VAR, tokens, currentIndex, finalIndex))
+                {
+                    return this.VarDeclaration(tokens, ref currentIndex, finalIndex);
+                }
+
+                return this.Statement(tokens, ref currentIndex, finalIndex);
+            }
+            catch(MSWParseException)
+            {
+                Synchronise(tokens, ref currentIndex, finalIndex);
+                return null;
+            }
+        }
+
+        private Statement VarDeclaration(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            this.NextToken(tokens, ref currentIndex, finalIndex);
+            MSWToken token = this.ConsumeToken(MSWTokenType.IDENTIFIER, "Expect variable name.", tokens, ref currentIndex, finalIndex);
+
+            Expression initialiser = null;
+            if (this.IsOfType(MSWTokenType.EQUAL, tokens, currentIndex, finalIndex))
+            {
+                this.NextToken(tokens, ref currentIndex, finalIndex);
+                initialiser = this.Expression(tokens, ref currentIndex, finalIndex);
+            }
+
+            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after variable declaration.", tokens, ref currentIndex, finalIndex);
+            return new VarDeclaration(token, initialiser);
+        }
+
+        private Statement Statement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            if (this.IsOfType(MSWTokenType.PRINT, tokens, currentIndex, finalIndex))
+            {
+                return this.PrintStatement(tokens, ref currentIndex, finalIndex);
+            }
+
+            return this.ExpressionStatement(tokens, ref currentIndex, finalIndex);
+        }
+
+        private Statement PrintStatement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            this.NextToken(tokens, ref currentIndex, finalIndex);
+            Expression value = this.Expression(tokens, ref currentIndex, finalIndex);
+            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.", tokens, ref currentIndex, finalIndex);
+            return new Print(value);
+        }
+
+        private Statement ExpressionStatement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            Expression value = this.Expression(tokens, ref currentIndex, finalIndex);
+            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.", tokens, ref currentIndex, finalIndex);
+            return new StatementExpression(value);
+        }
+
+        #endregion
     }
 }

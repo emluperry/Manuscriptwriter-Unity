@@ -1,20 +1,26 @@
 using System;
+using System.Collections.Generic;
 
 namespace MSW.Scripting
 {
-    public class MSWInterpreter : IMSWVisitor
+    public class MSWInterpreter : IMSWExpressionVisitor, IMSWStatementVisitor
     {
         public Action<MSWRuntimeException> ReportRuntimeError;
 
-        public object Interpret(Expression expression)
+        private Environment environment = new Environment();
+
+        public object Interpret(List<Statement> statements)
         {
             try
             {
-                return this.Evaluate(expression);
+                foreach (Statement s in statements)
+                {
+                    this.Execute(s);
+                }
             }
             catch(MSWRuntimeException e)
             {
-
+                ReportRuntimeError?.Invoke(e);
             }
 
             return "Failed to run interpretation.";
@@ -23,6 +29,11 @@ namespace MSW.Scripting
         private object Evaluate(Expression expr)
         {
             return expr.Accept(this);
+        }
+
+        private void Execute(Statement statement)
+        {
+            statement.Accept(this);
         }
 
         private bool IsTrue(object obj)
@@ -68,7 +79,12 @@ namespace MSW.Scripting
         }
         #endregion
 
-        #region Visitors
+        #region Expression Visitors
+        public object VisitVariable(Variable visitor)
+        {
+            return environment.Get(visitor.token);
+        }
+
         public object VisitLiteral(Literal expr)
         {
             return expr.literal;
@@ -153,6 +169,33 @@ namespace MSW.Scripting
                     return -(double)right;
             }
 
+            return null;
+        }
+        #endregion
+
+        #region STATEMENT VISITORS
+        public object VisitExpression(StatementExpression visitor)
+        {
+            this.Evaluate(visitor.expression);
+            return null;
+        }
+
+        public object VisitPrint(Print visitor)
+        {
+            object value = this.Evaluate(visitor.expression);
+            Console.WriteLine(value != null ? value.ToString() : "Null");
+            return null;
+        }
+
+        public object VisitVar(VarDeclaration visitor)
+        {
+            object value = null;
+            if(visitor.initialiser != null)
+            {
+                value = Evaluate(visitor.initialiser);
+            }
+
+            environment.Define(visitor.token.lexeme, value);
             return null;
         }
         #endregion

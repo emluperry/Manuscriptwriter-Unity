@@ -10,7 +10,7 @@ namespace MSW.Scripting
             this.right = right;
         }
 
-        public override object Accept(IMSWVisitor visitor)
+        public override object Accept(IMSWExpressionVisitor visitor)
         {
             return visitor.VisitUnary(this);
         }
