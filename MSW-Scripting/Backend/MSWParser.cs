@@ -25,6 +25,12 @@ namespace MSW.Scripting
                     break;
                 }
 
+                if (this.IsOfType(MSWTokenType.EOL, tokens, currentIndex, finalIndex))
+                {
+                    this.PopToken(tokens, ref currentIndex, finalIndex);
+                    continue;
+                }
+
                 var s = this.Declaration(tokens, ref currentIndex, finalIndex);
 
                 if(s != null)
@@ -151,7 +157,7 @@ namespace MSW.Scripting
 
         private Expression Assignment(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
-            Expression expression = this.Equality(tokens, ref currentIndex, finalIndex);
+            Expression expression = this.Or(tokens, ref currentIndex, finalIndex);
 
             if(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.EQUAL }, tokens, ref currentIndex, finalIndex))
             {
@@ -396,13 +402,18 @@ namespace MSW.Scripting
 
             Expression condition = this.Expression(tokens, ref currentIndex, finalIndex);
 
-            this.ConsumeToken(MSWTokenType.EOL, "Expect end of line after if condition.", tokens, ref currentIndex, finalIndex);
+            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after if condition.", tokens, ref currentIndex, finalIndex);
 
             Statement thenBranch = this.Statement(tokens, ref currentIndex, finalIndex);
             Statement elseBranch = null;
             if(this.IsOfType(MSWTokenType.ELSE, tokens, currentIndex, finalIndex))
             {
                 this.PopToken(tokens, ref currentIndex, finalIndex);
+                if(this.IsOfType(MSWTokenType.COMMA, tokens, currentIndex, finalIndex)) // An additional comma after an else is not necessary, but may be used as a style choice.
+                {
+                    this.PopToken(tokens, ref currentIndex, finalIndex);
+                }
+
                 elseBranch = this.Statement(tokens, ref currentIndex, finalIndex);
             }
 

@@ -173,7 +173,7 @@ namespace MSW.Scripting
                     return (double)left <= (double)right;
 
                 // EQUALITY
-                case MSWTokenType.EQUAL:
+                case MSWTokenType.EQUAL_EQUAL:
                     return this.IsEqual(left, right);
                 case MSWTokenType.NOT_EQUAL:
                     return !this.IsEqual(left, right);

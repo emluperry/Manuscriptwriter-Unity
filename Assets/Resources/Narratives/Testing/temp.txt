@@ -9,3 +9,5 @@ START
 var a = 5
 print a
 END
+IF a is 20 and b is 5, print true
+ELSE, print false

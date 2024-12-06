@@ -12,9 +12,16 @@ namespace MSW.Scripting
             { "true", MSWTokenType.TRUE },
             { "false", MSWTokenType.FALSE },
             { "not", MSWTokenType.NOT },
+            { "is", MSWTokenType.EQUAL_EQUAL },
             { "null", MSWTokenType.NULL },
             { "print", MSWTokenType.PRINT },
             { "var", MSWTokenType.VAR },
+            { "if", MSWTokenType.IF },
+            { "when", MSWTokenType.WHEN },
+            { "else", MSWTokenType.ELSE },
+            { "otherwise", MSWTokenType.ELSE },
+            { "and", MSWTokenType.AND },
+            { "or", MSWTokenType.OR },
         };
         
         public Action<int, string, string> ReportError;
