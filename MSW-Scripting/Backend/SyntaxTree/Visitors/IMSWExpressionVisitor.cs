@@ -8,5 +8,6 @@ namespace MSW.Scripting
         object VisitGrouping(Grouping visitor);
 
         object VisitVariable(Variable visitor);
+        object VisitAssignment(Assign visitor);
     }
 }

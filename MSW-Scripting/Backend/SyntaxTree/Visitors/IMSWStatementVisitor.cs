@@ -6,5 +6,7 @@
         object VisitPrint(Print visitor);
 
         object VisitVar(VarDeclaration visitor);
+
+        object VisitBlock(Block visitor);
     }
 }

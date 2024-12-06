@@ -9,7 +9,7 @@ namespace MSW.Scripting
         MINUS, PLUS, MULTIPLY, DIVIDE,
 
         // One/Two Character Tokens
-        EQUAL, NOT, NOT_EQUAL,
+        EQUAL, EQUAL_EQUAL, NOT, NOT_EQUAL,
         GREATER, GREATER_EQUAL, LESS, LESS_EQUAL,
 
         // Literals
@@ -25,7 +25,8 @@ namespace MSW.Scripting
         // Functions
         PRINT,
         
-        END,
+        // Start and end blocks - WIP
+        START, END,
 
         EOF, EOL, UNIDENTIFIED
     }

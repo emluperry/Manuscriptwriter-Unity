@@ -2,4 +2,10 @@ print 10*10
 # COMMENT HERE!
 var a = 20
 var b = 5
-print a + b
+var c = 1
+c = a + b
+print c
+START
+var a = 5
+print a
+END

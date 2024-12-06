@@ -146,14 +146,35 @@ namespace MSW.Scripting
         #region EXPRESSIONS
         private Expression Expression(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
-            return this.Equality(tokens, ref currentIndex, finalIndex);
+            return this.Assignment(tokens, ref currentIndex, finalIndex);
+        }
+
+        private Expression Assignment(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            Expression expression = this.Equality(tokens, ref currentIndex, finalIndex);
+
+            if(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.EQUAL }, tokens, ref currentIndex, finalIndex))
+            {
+                MSWToken equals = this.PeekPreviousToken(tokens, currentIndex);
+                Expression value = this.Assignment(tokens, ref currentIndex, finalIndex);
+
+                if(expression is Variable var)
+                {
+                    MSWToken token = var.token;
+                    return new Assign(token, value);
+                }
+
+                this.ParseError(equals, "Invalid assignment target.");
+            }
+
+            return expression;
         }
 
         private Expression Equality(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
         {
             Expression expression = this.Comparison(tokens, ref currentIndex, finalIndex);
 
-            while(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.NOT_EQUAL, MSWTokenType.EQUAL }, tokens, ref currentIndex, finalIndex))
+            while(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.NOT_EQUAL, MSWTokenType.EQUAL_EQUAL }, tokens, ref currentIndex, finalIndex))
             {
                 MSWToken op = this.PeekPreviousToken(tokens, currentIndex);
                 Expression right = this.Comparison(tokens, ref currentIndex, finalIndex);
@@ -297,6 +318,11 @@ namespace MSW.Scripting
                 return this.PrintStatement(tokens, ref currentIndex, finalIndex);
             }
 
+            if (this.IsOfType(MSWTokenType.START, tokens, currentIndex, finalIndex))
+            {
+                return new Block(this.Block(tokens, ref currentIndex, finalIndex));
+            }
+
             return this.ExpressionStatement(tokens, ref currentIndex, finalIndex);
         }
 
@@ -313,6 +339,22 @@ namespace MSW.Scripting
             Expression value = this.Expression(tokens, ref currentIndex, finalIndex);
             this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.", tokens, ref currentIndex, finalIndex);
             return new StatementExpression(value);
+        }
+
+        private List<Statement> Block(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        {
+            this.NextToken(tokens, ref currentIndex, finalIndex);
+            this.NextToken(tokens, ref currentIndex, finalIndex);
+
+            List<Statement> statements = new List<Statement>();
+
+            while(!this.IsOfType(MSWTokenType.END, tokens, currentIndex, finalIndex))
+            {
+                statements.Add(this.Declaration(tokens, ref currentIndex, finalIndex));
+            }
+
+            this.ConsumeToken(MSWTokenType.END, "Expect END after block.", tokens, ref currentIndex, finalIndex);
+            return statements;
         }
 
         #endregion

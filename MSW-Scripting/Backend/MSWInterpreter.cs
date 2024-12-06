@@ -36,6 +36,25 @@ namespace MSW.Scripting
             statement.Accept(this);
         }
 
+        private void ExecuteBlock(List<Statement> statements, Environment environment)
+        {
+            Environment previous = this.environment;
+
+            try
+            {
+                this.environment = environment;
+
+                foreach(Statement statement in statements)
+                {
+                    this.Execute(statement);
+                }
+            }
+            finally
+            {
+                this.environment = previous;
+            }
+        }
+
         private bool IsTrue(object obj)
         {
             if(obj == null)
@@ -80,6 +99,13 @@ namespace MSW.Scripting
         #endregion
 
         #region Expression Visitors
+        public object VisitAssignment(Assign visitor)
+        {
+            object value = this.Evaluate(visitor.value);
+            environment.Assign(visitor.token, value);
+            return value;
+        }
+
         public object VisitVariable(Variable visitor)
         {
             return environment.Get(visitor.token);
@@ -196,6 +222,12 @@ namespace MSW.Scripting
             }
 
             environment.Define(visitor.token.lexeme, value);
+            return null;
+        }
+
+        public object VisitBlock(Block visitor)
+        {
+            this.ExecuteBlock(visitor.statements, new Environment(environment));
             return null;
         }
         #endregion

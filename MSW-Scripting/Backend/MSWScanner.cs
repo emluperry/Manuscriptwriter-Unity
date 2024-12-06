@@ -8,6 +8,7 @@ namespace MSW.Scripting
         private static readonly Dictionary<string, MSWTokenType> keywords = new Dictionary<string, MSWTokenType>()
         {
             { "end", MSWTokenType.END },
+            { "start", MSWTokenType.START },
             { "true", MSWTokenType.TRUE },
             { "false", MSWTokenType.FALSE },
             { "not", MSWTokenType.NOT },
@@ -110,7 +111,7 @@ namespace MSW.Scripting
                 case '=':
                     if (CheckNextCharacter(ref currentIndex, finalIndex, source, '='))
                     {
-                        type = MSWTokenType.EQUAL;
+                        type = MSWTokenType.EQUAL_EQUAL;
                     }
                     else
                     {
