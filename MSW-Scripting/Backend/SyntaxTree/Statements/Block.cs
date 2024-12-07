@@ -4,8 +4,8 @@ namespace MSW.Scripting
 {
     public class Block : Statement
     {
-        public readonly List<Statement> statements;
-        public Block(List<Statement> statements)
+        public readonly IEnumerable<Statement> statements;
+        public Block(IEnumerable<Statement> statements)
         {
             this.statements = statements;
         }

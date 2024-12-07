@@ -3,18 +3,8 @@ var b = 5
 var c = 1
 c = a + b
 print c
-START
-var a = 5
-print a
-END
+
 IF a is 20 and b is 5, print true
 ELSE, print false
-
-WHILE a <= 25,
-START
-a = a + 1
-print true
-END
-print a
 
 for var i = 0, i <= 10, i = i + 1, print true

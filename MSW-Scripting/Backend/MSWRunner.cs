@@ -13,11 +13,11 @@ namespace MSW.Scripting
         {
             hasError = false;
 
-            MSWScanner scanner = new MSWScanner() { ReportError = ReportScannerError };
-            List<MSWToken> tokens = scanner.ScanTokens(source);
+            MSWScanner scanner = new MSWScanner(source) { ReportError = ReportScannerError };
+            Queue<MSWToken> tokens = scanner.ScanTokens();
 
-            MSWParser parser = new MSWParser() { ReportTokenError = ReportTokenError };
-            List<Statement> statements = parser.Parse(tokens);
+            MSWParser parser = new MSWParser(tokens) { ReportTokenError = ReportTokenError };
+            IEnumerable<Statement> statements = parser.Parse();
 
             if(hasError)
             {
@@ -37,7 +37,7 @@ namespace MSW.Scripting
             }
             else
             {
-                Report(token.line, $"at '{token.lexeme}'", message);
+                Report(token?.line ?? 0, $"at '{token?.lexeme}'", message);
             }
         }
 

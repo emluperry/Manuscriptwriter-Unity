@@ -9,7 +9,7 @@ namespace MSW.Scripting
 
         private Environment environment = new Environment();
 
-        public object Interpret(List<Statement> statements)
+        public object Interpret(IEnumerable<Statement> statements)
         {
             try
             {
@@ -36,13 +36,13 @@ namespace MSW.Scripting
             statement.Accept(this);
         }
 
-        private void ExecuteBlock(List<Statement> statements, Environment environment)
+        private void ExecuteBlock(IEnumerable<Statement> statements, Environment blockEnvironment)
         {
             Environment previous = this.environment;
 
             try
             {
-                this.environment = environment;
+                this.environment = blockEnvironment;
 
                 foreach(Statement statement in statements)
                 {

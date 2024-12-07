@@ -6,26 +6,30 @@ namespace MSW.Scripting
     public class MSWParser
     {
         public Action<MSWToken, string> ReportTokenError;
+        
+        private Queue<MSWToken> tokens;
 
-        public MSWParser()
+        public MSWParser(Queue<MSWToken> tokens)
         {
-
+            this.tokens = tokens;
         }
 
-        public List<Statement> Parse(List<MSWToken> tokens)
+        public IEnumerable<Statement> Parse()
         {
-            int finalIndex = tokens.Count;
-            int currentIndex = 0;
-
             List<Statement> statements = new List<Statement>();
-            while(currentIndex < finalIndex)
+            while(!this.IsEndOfStack())
             {
-                if (this.IsOfType(MSWTokenType.EOF, tokens, currentIndex, finalIndex))
+                if (this.CurrentMatchesType(MSWTokenType.EOF))
                 {
                     break;
                 }
 
-                var s = this.Declaration(tokens, ref currentIndex, finalIndex);
+                if (this.TryConsumeToken(MSWTokenType.EOL, out MSWToken eol))
+                {
+                    continue;
+                }
+
+                var s = this.Declaration();
 
                 if(s != null)
                 {
@@ -36,44 +40,32 @@ namespace MSW.Scripting
             return statements;
         }
 
-        private MSWToken PopToken(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private MSWToken TryDequeueToken()
         {
-            var token = tokens[currentIndex];
-            if(currentIndex < finalIndex)
-            {
-                ++currentIndex;
-            }
-
-            return token;
-        }
-
-        private MSWToken PeekToken(List<MSWToken> tokens, int currentIndex, int finalIndex)
-        {
-            if (currentIndex >= finalIndex)
+            if (this.IsEndOfStack())
             {
                 return null;
             }
 
-            return tokens[currentIndex];
+            return this.tokens.Dequeue();
         }
 
-        private MSWToken PeekPreviousToken(List<MSWToken> tokens, int currentIndex)
+        private MSWToken TryPeekToken()
         {
-            if(currentIndex - 1 < 0)
+            if (this.IsEndOfStack())
             {
                 return null;
             }
 
-            return tokens[currentIndex - 1];
+            return this.tokens.Peek();
         }
 
-        private bool IsOneOfTypes(List<MSWTokenType> tokenTypes, List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private bool CurrentMatchesOneOfTypes(IEnumerable<MSWTokenType> tokenTypes)
         {
             foreach (MSWTokenType tokenType in tokenTypes)
             { 
-                if(this.IsOfType(tokenType, tokens, currentIndex, finalIndex))
+                if(this.CurrentMatchesType(tokenType))
                 {
-                    this.PopToken(tokens, ref currentIndex, finalIndex);
                     return true;
                 }
             }
@@ -81,37 +73,61 @@ namespace MSW.Scripting
             return false;
         }
 
-        private bool IsOfType(MSWTokenType tokenType, List<MSWToken> tokens, int currentIndex, int finalIndex)
+        private bool CurrentMatchesType(MSWTokenType tokenType)
         {
-            if(currentIndex >= finalIndex)
-            {
-                return false;
-            }
-
-            return PeekToken(tokens, currentIndex, finalIndex).type == tokenType;
+            return TryPeekToken().type == tokenType;
         }
 
-        private MSWToken ConsumeToken(MSWTokenType type, string message, List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private bool TryConsumeToken(MSWTokenType type, out MSWToken token)
         {
-            if(this.IsOfType(type, tokens, currentIndex, finalIndex))
+            if (this.CurrentMatchesType(type))
             {
-                return this.PopToken(tokens, ref currentIndex, finalIndex);
+                token = this.tokens.Dequeue();
+                return true;
             }
 
-            throw this.ParseError(this.PeekToken(tokens, currentIndex, finalIndex), message);
+            token = null;
+            return false;
         }
 
-        private MSWToken ConsumeOneOfTokens(List<MSWTokenType> types, string message, List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private bool TryConsumeOneOfTokens(IEnumerable<MSWTokenType> tokenTypes, out MSWToken token)
+        {
+            if (this.CurrentMatchesOneOfTypes(tokenTypes))
+            {
+                token = this.TryDequeueToken();
+                return true;
+            }
+
+            token = null;
+            return false;
+        }
+
+        private MSWToken ConsumeToken(MSWTokenType type, string message)
+        {
+            if(this.CurrentMatchesType(type))
+            {
+                return this.TryDequeueToken();
+            }
+
+            throw this.ParseError(this.TryPeekToken(), message);
+        }
+
+        private MSWToken ConsumeOneOfTokens(List<MSWTokenType> types, string message)
         {
             foreach (MSWTokenType tokenType in types)
             {
-                if (this.IsOfType(tokenType, tokens, currentIndex, finalIndex))
+                if (this.CurrentMatchesType(tokenType))
                 {
-                    return this.PopToken(tokens, ref currentIndex, finalIndex);
+                    return this.TryDequeueToken();
                 }
             }
 
-            throw this.ParseError(this.PeekToken(tokens, currentIndex, finalIndex), message);
+            throw this.ParseError(this.TryPeekToken(), message);
+        }
+
+        private bool IsEndOfStack()
+        {
+            return this.tokens.Count <= 0;
         }
 
         #region ERROR HANDLING
@@ -122,41 +138,179 @@ namespace MSW.Scripting
             return new MSWParseException();
         }
 
-        private void Synchronise(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private void Synchronise()
         {
-            this.PopToken(tokens, ref currentIndex, finalIndex);
+            this.TryDequeueToken();
 
-            while(currentIndex < finalIndex)
+            while(!this.IsEndOfStack())
             {
-                switch(this.PeekToken(tokens, currentIndex, finalIndex).type)
+                switch(this.TryPeekToken().type)
                 {
-                    case MSWTokenType.END:
                     case MSWTokenType.EOL:
-                        this.PopToken(tokens, ref currentIndex, finalIndex);
+                        this.TryDequeueToken();
                         return;
                     case MSWTokenType.EOF:
                         return;
                 }
 
-                this.PopToken(tokens, ref currentIndex, finalIndex);
+                this.TryDequeueToken();
             }
         }
         #endregion
 
-        #region EXPRESSIONS
-        private Expression Expression(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        #region STATEMENTS
+
+        private Statement Declaration()
         {
-            return this.Assignment(tokens, ref currentIndex, finalIndex);
+            try
+            {
+                if (this.TryConsumeToken(MSWTokenType.VAR, out MSWToken var))
+                {
+                    return this.VarDeclaration();
+                }
+
+                return this.Statement();
+            }
+            catch(MSWParseException)
+            {
+                Synchronise();
+                return null;
+            }
         }
 
-        private Expression Assignment(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private Statement VarDeclaration()
         {
-            Expression expression = this.Or(tokens, ref currentIndex, finalIndex);
+            MSWToken token = this.ConsumeToken(MSWTokenType.IDENTIFIER, "Expect variable name.");
 
-            if(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.EQUAL }, tokens, ref currentIndex, finalIndex))
+            Expression initialiser = null;
+            if (this.TryConsumeToken(MSWTokenType.EQUAL, out MSWToken equals))
             {
-                MSWToken equals = this.PeekPreviousToken(tokens, currentIndex);
-                Expression value = this.Assignment(tokens, ref currentIndex, finalIndex);
+                initialiser = this.Expression();
+            }
+
+            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.COMMA, MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after variable declaration.");
+            return new VarDeclaration(token, initialiser);
+        }
+
+        private Statement Statement()
+        {
+            if (this.TryConsumeToken(MSWTokenType.FOR, out MSWToken forToken))
+            {
+                return this.ForStatement();
+            }
+
+            if (this.TryConsumeToken(MSWTokenType.IF, out MSWToken ifToken))
+            {
+                return this.IfStatement();
+            }
+
+            if(this.TryConsumeToken(MSWTokenType.WHILE, out MSWToken whileToken))
+            {
+                return this.WhileStatement();
+            }
+            
+            if (this.TryConsumeToken(MSWTokenType.PRINT, out MSWToken printToken))
+            {
+                return this.PrintStatement();
+            }
+
+            return this.ExpressionStatement();
+        }
+
+        private Statement ExpressionStatement()
+        {
+            Expression value = this.Expression();
+            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.COMMA, MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.");
+            return new StatementExpression(value);
+        }
+
+        private Statement IfStatement()
+        {
+            Expression condition = this.Expression();
+
+            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after if condition.");
+
+            Statement thenBranch = this.Statement();
+            Statement elseBranch = null;
+            if(this.TryConsumeToken(MSWTokenType.ELSE, out MSWToken elseToken))
+            {
+                this.TryConsumeToken(MSWTokenType.COMMA, out MSWToken commaToken); // An additional comma after an else is not necessary, but may be used as a style choice.
+
+                elseBranch = this.Statement();
+            }
+
+            return new If(condition, thenBranch, elseBranch);
+        }
+
+        private Statement WhileStatement()
+        {
+            Expression condition = this.Expression();
+            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after if condition.");
+            Statement statement = this.Statement();
+
+            return new While(condition, statement);
+        }
+
+        private Statement ForStatement()
+        {
+            Statement initialiser = null;
+            if(this.TryConsumeToken(MSWTokenType.VAR, out MSWToken var))
+            {
+                initialiser = this.VarDeclaration();
+            }
+            else
+            {
+                 this.TryDequeueToken();
+                 initialiser = this.ExpressionStatement();
+            }
+
+            Expression condition = this.Expression();
+            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after loop condition.");
+
+            Expression increment = this.Expression();
+            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after loop increment.");
+
+            Statement body = this.Statement();
+
+            if(increment != null)
+            {
+                body = new Block(new List<Statement>() { body, new StatementExpression(increment) });
+            }
+
+            condition ??= new Literal(true);
+            
+            body = new While(condition, body);
+
+            if(initialiser != null)
+            {
+                body = new Block(new List<Statement>() { initialiser, body });
+            }
+
+            return body;
+        }
+        
+        private Statement PrintStatement()
+        {
+            Expression value = this.Expression();
+            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.");
+            return new Print(value);
+        }
+
+        #endregion
+        
+        #region EXPRESSIONS
+        private Expression Expression()
+        {
+            return this.Assignment();
+        }
+
+        private Expression Assignment()
+        {
+            Expression expression = this.Or();
+
+            if(this.TryConsumeToken(MSWTokenType.EQUAL, out MSWToken equals))
+            {
+                Expression value = this.Assignment();
 
                 if(expression is Variable var)
                 {
@@ -170,326 +324,126 @@ namespace MSW.Scripting
             return expression;
         }
 
-        private Expression Or(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private Expression Or()
         {
-            Expression expression = this.And(tokens, ref currentIndex, finalIndex);
+            Expression expression = this.And();
 
-            while(this.IsOfType(MSWTokenType.OR, tokens, currentIndex, finalIndex))
+            while(this.TryConsumeToken(MSWTokenType.OR, out MSWToken op))
             {
-                MSWToken op = this.PopToken(tokens, ref currentIndex, finalIndex);
-                Expression right = this.And(tokens, ref currentIndex, finalIndex);
+                Expression right = this.And();
                 expression = new Logical(expression, op, right);
             }
 
             return expression;
         }
 
-        private Expression And(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private Expression And()
         {
-            Expression expression = this.Equality(tokens, ref currentIndex, finalIndex);
+            Expression expression = this.Equality();
 
-            while (this.IsOfType(MSWTokenType.AND, tokens, currentIndex, finalIndex))
+            while (this.TryConsumeToken(MSWTokenType.AND, out MSWToken op))
             {
-                MSWToken op = this.PopToken(tokens, ref currentIndex, finalIndex);
-                Expression right = this.Equality(tokens, ref currentIndex, finalIndex);
+                Expression right = this.Equality();
                 expression = new Logical(expression, op, right);
             }
 
             return expression;
         }
 
-        private Expression Equality(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private Expression Equality()
         {
-            Expression expression = this.Comparison(tokens, ref currentIndex, finalIndex);
+            Expression expression = this.Comparison();
 
-            while(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.NOT_EQUAL, MSWTokenType.EQUAL_EQUAL }, tokens, ref currentIndex, finalIndex))
+            while(this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.NOT_EQUAL, MSWTokenType.EQUAL_EQUAL }, out MSWToken op))
             {
-                MSWToken op = this.PeekPreviousToken(tokens, currentIndex);
-                Expression right = this.Comparison(tokens, ref currentIndex, finalIndex);
+                Expression right = this.Comparison();
                 expression = new Binary(expression, op, right);
             }
 
             return expression;
         }
 
-        private Expression Comparison(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private Expression Comparison()
         {
-            Expression expression = this.Term(tokens, ref currentIndex, finalIndex);
+            Expression expression = this.Term();
 
-            while(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.GREATER, MSWTokenType.GREATER_EQUAL, MSWTokenType.LESS, MSWTokenType.LESS_EQUAL}, tokens, ref currentIndex, finalIndex))
+            while(this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.GREATER, MSWTokenType.GREATER_EQUAL, MSWTokenType.LESS, MSWTokenType.LESS_EQUAL}, out MSWToken op))
             {
-                MSWToken op = this.PeekPreviousToken(tokens, currentIndex);
-                Expression right = this.Term(tokens, ref currentIndex, finalIndex);
+                Expression right = this.Term();
                 expression = new Binary(expression, op, right);
             }
 
             return expression;
         }
 
-        private Expression Term(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private Expression Term()
         {
-            Expression expression = this.Factor(tokens, ref currentIndex, finalIndex);
+            Expression expression = this.Factor();
 
-            while(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.MINUS, MSWTokenType.PLUS }, tokens, ref currentIndex, finalIndex))
+            while(this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.MINUS, MSWTokenType.PLUS }, out MSWToken op))
             {
-                MSWToken op = this.PeekPreviousToken(tokens, currentIndex);
-                Expression right = this.Factor(tokens, ref currentIndex, finalIndex);
+                Expression right = this.Factor();
                 expression = new Binary(expression, op, right);
             }
 
             return expression;
         }
 
-        private Expression Factor(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private Expression Factor()
         {
-            Expression expression = this.Unary(tokens, ref currentIndex, finalIndex);
+            Expression expression = this.Unary();
 
-            while(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.MULTIPLY, MSWTokenType.DIVIDE }, tokens, ref currentIndex, finalIndex))
+            while(this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.MULTIPLY, MSWTokenType.DIVIDE }, out MSWToken op))
             {
-                MSWToken op = this.PeekPreviousToken(tokens, currentIndex);
-                Expression right = this.Unary(tokens, ref currentIndex, finalIndex);
+                Expression right = this.Unary();
                 expression = new Binary(expression, op, right);
             }
 
             return expression;
         }
 
-        private Expression Unary(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private Expression Unary()
         {
-            if(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.NOT, MSWTokenType.MINUS }, tokens, ref currentIndex, finalIndex))
+            if(this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.NOT, MSWTokenType.MINUS }, out MSWToken op))
             {
-                MSWToken op = this.PeekPreviousToken(tokens, currentIndex);
-                Expression right = this.Unary(tokens, ref currentIndex, finalIndex);
+                Expression right = this.Unary();
                 return new Unary(op, right);
             }
 
-            return this.Primary(tokens, ref currentIndex, finalIndex);
+            return this.Primary();
         }
 
-        private Expression Primary(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
+        private Expression Primary()
         {
-            if(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.FALSE }, tokens, ref currentIndex, finalIndex))
+            if(this.TryConsumeToken(MSWTokenType.FALSE, out MSWToken opf))
             {
                 return new Literal(false);
             }
-            if (this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.TRUE }, tokens, ref currentIndex, finalIndex))
+            if (this.TryConsumeToken(MSWTokenType.TRUE, out MSWToken opt))
             {
                 return new Literal(true);
             }
-            if (this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.NULL }, tokens, ref currentIndex, finalIndex))
+            if (this.TryConsumeToken(MSWTokenType.NULL, out MSWToken opn))
             {
                 return new Literal(null);
             }
 
-            if (this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.STRING, MSWTokenType.DOUBLE }, tokens, ref currentIndex, finalIndex))
+            if (this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.STRING, MSWTokenType.DOUBLE }, out MSWToken opl))
             {
-                return new Literal(this.PeekPreviousToken(tokens, currentIndex).literal);
+                return new Literal(opl.literal);
             }
 
-            if(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.IDENTIFIER }, tokens, ref currentIndex, finalIndex))
+            if(this.TryConsumeToken(MSWTokenType.IDENTIFIER, out MSWToken opv))
             {
-                return new Variable(this.PeekPreviousToken(tokens, currentIndex));
+                return new Variable(opv);
             }
 
-            if (this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.LEFT_PARENTHESIS }, tokens, ref currentIndex, finalIndex))
-            {
-                Expression expression = this.Expression(tokens, ref currentIndex, finalIndex);
-                this.ConsumeToken(MSWTokenType.RIGHT_PARENTHESIS, "Expect ')' after expression.", tokens, ref currentIndex, finalIndex);
-                return new Grouping(expression);
-            }
-
-            if(this.IsOneOfTypes(new List<MSWTokenType> { MSWTokenType.EOL }, tokens, ref currentIndex, finalIndex))
+            if(this.TryConsumeToken(MSWTokenType.EOL, out MSWToken opeol))
             {
                 return null;
             }
 
-            throw ParseError(this.PeekToken(tokens, currentIndex, finalIndex), "Expect expression.");
-        }
-
-        #endregion
-
-        #region STATEMENTS
-
-        private Statement Declaration(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
-        {
-            try
-            {
-                if (this.IsOfType(MSWTokenType.EOL, tokens, currentIndex, finalIndex))
-                {
-                    this.PopToken(tokens, ref currentIndex, finalIndex);
-                }
-
-                if (this.IsOfType(MSWTokenType.VAR, tokens, currentIndex, finalIndex))
-                {
-                    return this.VarDeclaration(tokens, ref currentIndex, finalIndex);
-                }
-
-                return this.Statement(tokens, ref currentIndex, finalIndex);
-            }
-            catch(MSWParseException)
-            {
-                Synchronise(tokens, ref currentIndex, finalIndex);
-                return null;
-            }
-        }
-
-        private Statement VarDeclaration(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
-        {
-            this.PopToken(tokens, ref currentIndex, finalIndex);
-            MSWToken token = this.ConsumeToken(MSWTokenType.IDENTIFIER, "Expect variable name.", tokens, ref currentIndex, finalIndex);
-
-            Expression initialiser = null;
-            if (this.IsOfType(MSWTokenType.EQUAL, tokens, currentIndex, finalIndex))
-            {
-                this.PopToken(tokens, ref currentIndex, finalIndex);
-                initialiser = this.Expression(tokens, ref currentIndex, finalIndex);
-            }
-
-            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.COMMA, MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after variable declaration.", tokens, ref currentIndex, finalIndex);
-            return new VarDeclaration(token, initialiser);
-        }
-
-        private Statement Statement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
-        {
-            if (this.IsOfType(MSWTokenType.EOL, tokens, currentIndex, finalIndex))
-            {
-                this.PopToken(tokens, ref currentIndex, finalIndex);
-            }
-
-            if (this.IsOfType(MSWTokenType.FOR, tokens, currentIndex, finalIndex))
-            {
-                return this.ForStatement(tokens, ref currentIndex, finalIndex);
-            }
-
-            if (this.IsOfType(MSWTokenType.IF, tokens, currentIndex, finalIndex))
-            {
-                return this.IfStatement(tokens, ref currentIndex, finalIndex);
-            }
-
-            if (this.IsOfType(MSWTokenType.PRINT, tokens, currentIndex, finalIndex))
-            {
-                return this.PrintStatement(tokens, ref currentIndex, finalIndex);
-            }
-
-            if(this.IsOfType(MSWTokenType.WHILE, tokens, currentIndex, finalIndex))
-            {
-                return this.WhileStatement(tokens, ref currentIndex, finalIndex);
-            }
-
-            if (this.IsOfType(MSWTokenType.START, tokens, currentIndex, finalIndex))
-            {
-                return new Block(this.Block(tokens, ref currentIndex, finalIndex));
-            }
-
-            return this.ExpressionStatement(tokens, ref currentIndex, finalIndex);
-        }
-
-        private Statement PrintStatement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
-        {
-            this.PopToken(tokens, ref currentIndex, finalIndex);
-            Expression value = this.Expression(tokens, ref currentIndex, finalIndex);
-            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.", tokens, ref currentIndex, finalIndex);
-            return new Print(value);
-        }
-
-        private Statement ExpressionStatement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
-        {
-            Expression value = this.Expression(tokens, ref currentIndex, finalIndex);
-            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.COMMA, MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.", tokens, ref currentIndex, finalIndex);
-            return new StatementExpression(value);
-        }
-
-        private List<Statement> Block(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
-        {
-            this.PopToken(tokens, ref currentIndex, finalIndex);
-            this.PopToken(tokens, ref currentIndex, finalIndex);
-
-            List<Statement> statements = new List<Statement>();
-
-            while(!this.IsOfType(MSWTokenType.END, tokens, currentIndex, finalIndex))
-            {
-                statements.Add(this.Declaration(tokens, ref currentIndex, finalIndex));
-            }
-
-            this.ConsumeToken(MSWTokenType.END, "Expect END after block.", tokens, ref currentIndex, finalIndex);
-            return statements;
-        }
-
-        private Statement IfStatement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
-        {
-            this.PopToken(tokens, ref currentIndex, finalIndex);
-
-            Expression condition = this.Expression(tokens, ref currentIndex, finalIndex);
-
-            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after if condition.", tokens, ref currentIndex, finalIndex);
-
-            Statement thenBranch = this.Statement(tokens, ref currentIndex, finalIndex);
-            Statement elseBranch = null;
-            if(this.IsOfType(MSWTokenType.ELSE, tokens, currentIndex, finalIndex))
-            {
-                this.PopToken(tokens, ref currentIndex, finalIndex);
-                if(this.IsOfType(MSWTokenType.COMMA, tokens, currentIndex, finalIndex)) // An additional comma after an else is not necessary, but may be used as a style choice.
-                {
-                    this.PopToken(tokens, ref currentIndex, finalIndex);
-                }
-
-                elseBranch = this.Statement(tokens, ref currentIndex, finalIndex);
-            }
-
-            return new If(condition, thenBranch, elseBranch);
-        }
-
-        private Statement WhileStatement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
-        {
-            this.PopToken(tokens, ref currentIndex, finalIndex);
-
-            Expression condition = this.Expression(tokens, ref currentIndex, finalIndex);
-            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after if condition.", tokens, ref currentIndex, finalIndex);
-            Statement statement = this.Statement(tokens, ref currentIndex, finalIndex);
-
-            return new While(condition, statement);
-        }
-
-        private Statement ForStatement(List<MSWToken> tokens, ref int currentIndex, int finalIndex)
-        {
-            this.PopToken(tokens, ref currentIndex, finalIndex);
-
-            Statement initialiser;
-            if(this.IsOfType(MSWTokenType.VAR, tokens, currentIndex, finalIndex))
-            {
-                initialiser = this.VarDeclaration(tokens, ref currentIndex, finalIndex);
-            }
-            else
-            {
-                this.PopToken(tokens, ref currentIndex, finalIndex);
-                initialiser = this.ExpressionStatement(tokens, ref currentIndex, finalIndex);
-            }
-
-            Expression condition = this.Expression(tokens, ref currentIndex, finalIndex);
-            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after loop condition.", tokens, ref currentIndex, finalIndex);
-
-            Expression increment = this.Expression(tokens, ref currentIndex, finalIndex);
-            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after loop increment.", tokens, ref currentIndex, finalIndex);
-
-            Statement body = this.Statement(tokens, ref currentIndex, finalIndex);
-
-            if(increment != null)
-            {
-                body = new Block(new List<Statement>() { body, new StatementExpression(increment) });
-            }
-
-            if(condition == null)
-            {
-                condition = new Literal(true);
-            }
-            body = new While(condition, body);
-
-            if(initialiser != null)
-            {
-                body = new Block(new List<Statement>() { initialiser, body });
-            }
-
-            return body;
+            throw ParseError(this.TryPeekToken(), "Expect expression.");
         }
 
         #endregion

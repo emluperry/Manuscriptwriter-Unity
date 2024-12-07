@@ -3,16 +3,18 @@ namespace MSW.Scripting
     public enum MSWTokenType
     {
         // Single-Character
-        LEFT_PARENTHESIS, RIGHT_PARENTHESIS,
-        LEFT_SQUARE, RIGHT_SQUARE,
         COLON, COMMA, HASH,
+        
+        // -- Mathematics
         MINUS, PLUS, MULTIPLY, DIVIDE,
 
-        // One/Two Character Tokens
+        // Conditionals
         EQUAL, EQUAL_EQUAL, NOT, NOT_EQUAL,
         GREATER, GREATER_EQUAL, LESS, LESS_EQUAL,
 
-        // Literals
+        AND, OR,
+        
+        // Literals and Types
         IDENTIFIER, STRING, DOUBLE,
 
         // -- Keywords
@@ -22,18 +24,16 @@ namespace MSW.Scripting
         // Declarations
         VAR,
         
+        // Conditionals
+        IF, ELSE,
+        WHILE, FOR,
+        
+        // Event definition
+        WHEN,
+        
         // Functions
         PRINT,
-
-        // Conditionals
-        IF, ELSE, WHEN,
-        WHILE, FOR,
-
-        AND, OR,
         
-        // Start and end blocks
-        START, END,
-
         EOF, EOL, UNIDENTIFIED
     }
 }
