@@ -468,3 +468,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+MSW-Scripting/.idea
+MSW-Scripting/global.json
+MSW-Scripting/MSW-Scripting.csproj.DotSettings
