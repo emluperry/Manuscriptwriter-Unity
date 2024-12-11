@@ -5,10 +5,18 @@ namespace MSW.Scripting
 {
     public class MSWRunner
     {
+        public readonly List<object> FunctionLibrary;
+        
         public Action<string> ErrorLogger;
         public Action<string> DebugOutput;
 
         private bool hasError = false;
+
+        public MSWRunner(List<object> functions = null)
+        {
+            FunctionLibrary = functions;
+        }
+        
         public void Run(string source)
         {
             hasError = false;

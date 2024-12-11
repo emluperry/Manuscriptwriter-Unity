@@ -410,7 +410,24 @@ namespace MSW.Scripting
                 return new Unary(op, right);
             }
 
-            return this.Primary();
+            return this.Call();
+        }
+
+        private Expression Call()
+        {
+            Expression expression = this.Primary();
+            
+            // How are we going to pull functions from external "libraries"?
+            if (this.TryConsumeToken(MSWTokenType.COLON, out MSWToken op))
+            {
+                 // Dialogue
+                 Expression dialogue = this.Primary();
+                 
+                 // Need to make this into an expression -> best to use call I think, but need to figure how best to do so.
+                 return new Call("RunDialogue", op, new List<Expression>() { expression, dialogue });
+            }
+            
+            return expression;
         }
 
         private Expression Primary()
@@ -436,11 +453,6 @@ namespace MSW.Scripting
             if(this.TryConsumeToken(MSWTokenType.IDENTIFIER, out MSWToken opv))
             {
                 return new Variable(opv);
-            }
-
-            if(this.TryConsumeToken(MSWTokenType.EOL, out MSWToken opeol))
-            {
-                return null;
             }
 
             throw ParseError(this.TryPeekToken(), "Expect expression.");

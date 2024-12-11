@@ -22,14 +22,14 @@ namespace MSW.Scripting
         TRUE, FALSE, NULL,
 
         // Declarations
-        VAR,
+        VAR, FUNCTION,
         
         // Conditionals
         IF, ELSE,
         WHILE, FOR,
         
         // Event definition
-        WHEN,
+        GIVEN, WHEN,
         
         // Functions
         PRINT,

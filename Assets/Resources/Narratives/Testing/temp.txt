@@ -8,3 +8,10 @@ IF a is 20 and b is 5, print true
 ELSE, print false
 
 for var i = 0, i <= 10, i = i + 1, print true
+
+# Emily walks to the middle of the room
+var emily = "Emily"
+Emily: Hello world!
+
+var strValue = "hello world! This is a test."
+print strValue

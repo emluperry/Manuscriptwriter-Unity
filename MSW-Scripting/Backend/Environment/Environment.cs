@@ -33,9 +33,24 @@ namespace MSW.Scripting
             {
                 return enclosing.Get(token);
             }
-
-
+            
             throw new MSWRuntimeException(token, $"Undefined variable {token.lexeme}.");
+        }
+
+        public object Get(string lexeme)
+        {
+            if(variables.ContainsKey(lexeme))
+            {
+                return variables[lexeme];
+            }
+
+            if(this.enclosing != null)
+            {
+                return enclosing.Get(lexeme);
+            }
+
+
+            throw new MSWRuntimeException(null, $"Undefined variable {lexeme}.");
         }
 
         public void Assign(MSWToken token, object value)

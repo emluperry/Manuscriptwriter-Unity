@@ -31,12 +31,33 @@ namespace MSW.Scripting
         private int startIndex = 0;
         private int currentIndex = 0;
         private int finalIndex;
-        private int line = 1;
+        private int lineNumber = 1;
         
         public MSWScanner(string source)
         {
             this.source = source;
         }
+
+        // public Queue<MSWToken> ScanLines()
+        // {
+        //     this.tokens = new List<MSWToken>();
+        //     finalIndex = source.Length;
+        //     
+        //     string[] lines = source.Split('\n');
+        //     foreach (string l in lines)
+        //     {
+        //         this.ScanLine(l);
+        //     }
+        //     
+        //     tokens.Add(new MSWToken(MSWTokenType.EOF, "", null, lineNumber));
+        //     return new Queue<MSWToken>(this.tokens);
+        // }
+        //
+        // private List<MSWToken> ScanLine(string l)
+        // {
+        //     var lineTokens = new List<MSWToken>();
+        //     // If any one token hits an error, the whole line becomes one token?
+        // }
 
         public Queue<MSWToken> ScanTokens()
         {
@@ -49,7 +70,7 @@ namespace MSW.Scripting
                 this.ScanToken();
             }
 
-            tokens.Add(new MSWToken(MSWTokenType.EOF, "", null, line));
+            tokens.Add(new MSWToken(MSWTokenType.EOF, "", null, lineNumber));
 
             return new Queue<MSWToken>(tokens);
         }
@@ -62,7 +83,7 @@ namespace MSW.Scripting
                 return;
             }
             
-            this.tokens.Add(new MSWToken(token, lexeme, literal, line));
+            this.tokens.Add(new MSWToken(token, lexeme, literal, lineNumber));
         }
         
         private char PeekNextCharacter()
@@ -100,13 +121,13 @@ namespace MSW.Scripting
                 case ',': this.AddToken(MSWTokenType.COMMA, c);
                     break;
                 case ':': this.AddToken(MSWTokenType.COLON, c);
-
-                    if (this.ConsumeNextCharacterIfMatching(' '))
-                    {
-                        this.AddToken(MSWTokenType.STRING, this.GetString('\n'), this.GetString('\n'));
-                    }
+                    startIndex = currentIndex -1;
+                    string dialogue = this.GetString('\n', true);
+                    this.AddToken(MSWTokenType.STRING, dialogue, dialogue);
                     break;
-                case '"': this.AddToken(MSWTokenType.STRING, this.GetString('\n'), this.GetString('\n'));
+                case '"':
+                    string str = this.GetString('"');
+                    this.AddToken(MSWTokenType.STRING, str, str);
                     break;
 
                 case '-': this.AddToken(MSWTokenType.MINUS, c);
@@ -177,7 +198,7 @@ namespace MSW.Scripting
                     break;
 
                 case '\n': this.AddToken(MSWTokenType.EOL, c);
-                    ++line;
+                    ++lineNumber;
                     break;
                 case '\0': this.AddToken(MSWTokenType.EOF, c);
                     break;
@@ -193,7 +214,7 @@ namespace MSW.Scripting
                     }
                     else
                     {
-                        ReportError?.Invoke(line, $"character {startIndex - currentIndex}", "Unexpected character.");
+                        ReportError?.Invoke(lineNumber, $"character {startIndex - currentIndex}", "Unexpected character.");
                     }
 
                     break;
@@ -201,14 +222,30 @@ namespace MSW.Scripting
         }
 
         #region Types
-        private string GetString(char endChar = '"')
+        private string GetString(char endChar = '"', bool trimStartingSpaces = false)
         {
             char nextCharacter = PeekNextCharacter();
-            while (nextCharacter != endChar && currentIndex + 1 < finalIndex)
+
+            if (trimStartingSpaces)
+            {
+                while (nextCharacter == ' ' && currentIndex < finalIndex)
+                {
+                    if (nextCharacter == '\n')
+                    {
+                        ++lineNumber;
+                    }
+
+                    startIndex++;
+                    NextCharacter();
+                    nextCharacter = PeekNextCharacter();
+                }
+            }
+            
+            while (nextCharacter != endChar && currentIndex < finalIndex)
             {
                 if (nextCharacter == '\n')
                 {
-                    ++line;
+                    ++lineNumber;
                 }
 
                 NextCharacter();

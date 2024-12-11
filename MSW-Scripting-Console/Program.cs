@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace MSW.Scripting.Console
 {
@@ -15,7 +17,6 @@ namespace MSW.Scripting.Console
 
             // Output the file for debugging.
             System.Console.WriteLine(data);
-
             System.Console.WriteLine("///////////////////////////////// OUTPUT FOLLOWS ////////////////////////////////");
 
             // Run the debug code.

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MSW.Scripting.NativeFunctions;
 
 namespace MSW.Scripting
 {
@@ -7,7 +8,16 @@ namespace MSW.Scripting
     {
         public Action<MSWRuntimeException> ReportRuntimeError;
 
-        private Environment environment = new Environment();
+        private Environment globals;
+        private Environment environment;
+
+        public MSWInterpreter()
+        {
+            this.globals = new Environment();
+            this.environment = globals;
+            
+            globals.Define("RunDialogue", new RunDialogue());
+        }
 
         public object Interpret(IEnumerable<Statement> statements)
         {
@@ -29,6 +39,12 @@ namespace MSW.Scripting
         private object Evaluate(Expression expr)
         {
             return expr.Accept(this);
+        }
+
+        private object EvaluateCalleeString(string callee)
+        {
+            // env.get doesnt accept a string -> options: force it to accept a string or force the callee line into a token or variable expression.
+            return environment.Get(callee);
         }
 
         private void Execute(Statement statement)
@@ -219,6 +235,33 @@ namespace MSW.Scripting
 
             return this.Evaluate(visitor.right);
         }
+
+        public object VisitCall(Call visitor)
+        {
+            object callee = this.EvaluateCalleeString(visitor.callee);
+            
+            List<object> arguments = new List<object>();
+            foreach (var argument in visitor.arguments)
+            {
+                arguments.Add(this.Evaluate(argument));
+            }
+
+            if (callee is ICallable function)
+            {
+                int arityValue = function.Arity();
+                int argCount = visitor.arguments.Count;
+                if (argCount != arityValue)
+                {
+                    throw new MSWRuntimeException(visitor.calleeToken,
+                        $"Invalid function syntax - expected {argCount} arguments but only found {arityValue}.");
+                }
+                
+                return function.Call(this, arguments);
+            }
+
+            throw new MSWRuntimeException(visitor.calleeToken, "Invalid function syntax!");
+        }
+
         #endregion
 
         #region STATEMENT VISITORS
