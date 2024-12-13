@@ -27,7 +27,7 @@ namespace MSW.Compiler
         
         private List<Token> tokens;
         private readonly IReadOnlyList<object> functionLibraries;
-        private List<CustomFunction> functions;
+        private readonly List<CustomFunction> functions;
 
         private int currentIndex = 0;
 
@@ -35,6 +35,7 @@ namespace MSW.Compiler
         {
             this.tokens = tokens;
             this.functionLibraries = functionLibrary;
+            this.functions = new List<CustomFunction>();
 
             if (functionLibrary != null)
             {
@@ -45,7 +46,6 @@ namespace MSW.Compiler
         #region LIBRARIES
         private void SetupLibrary(IReadOnlyList<object> functionLibrary)
         {
-            this.functions = new List<CustomFunction>();
             foreach (var lib in functionLibrary)
             {
                 var usableMethods = lib.GetType().GetMethods()
