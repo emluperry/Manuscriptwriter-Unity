@@ -1,11 +1,11 @@
 namespace MSW.Scripting
 {
-    public class Binary : Expression
+    internal class Binary : Expression
     {
         public readonly Expression left;
-        public readonly MSWToken op;
+        public readonly Token op;
         public readonly Expression right;
-        public Binary(Expression left, MSWToken op, Expression right)
+        public Binary(Expression left, Token op, Expression right)
         {
             this.left = left;
             this.op = op;

@@ -1,6 +1,6 @@
 ﻿namespace MSW.Scripting
 {
-    public class Print : Statement
+    internal class Print : Statement
     {
         public readonly Expression expression;
 

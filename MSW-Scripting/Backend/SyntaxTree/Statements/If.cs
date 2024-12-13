@@ -1,6 +1,6 @@
 ﻿namespace MSW.Scripting
 {
-    public class If : Statement
+    internal class If : Statement
     {
         public readonly Expression condition;
         public readonly Statement thenBranch;

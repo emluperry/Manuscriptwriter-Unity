@@ -2,7 +2,7 @@
 
 namespace MSW.Scripting
 {
-    public class Environment
+    internal class Environment
     {
         private readonly Dictionary<string, object> variables = new Dictionary<string, object>();
         private readonly Environment enclosing;
@@ -22,7 +22,7 @@ namespace MSW.Scripting
             variables[name] = value;
         }
 
-        public object Get(MSWToken token)
+        public object Get(Token token)
         {
             if(variables.ContainsKey(token.lexeme))
             {
@@ -49,11 +49,10 @@ namespace MSW.Scripting
                 return enclosing.Get(lexeme);
             }
 
-
             throw new MSWRuntimeException(null, $"Undefined variable {lexeme}.");
         }
 
-        public void Assign(MSWToken token, object value)
+        public void Assign(Token token, object value)
         {
             if(variables.ContainsKey(token.lexeme))
             {

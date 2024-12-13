@@ -1,6 +1,6 @@
 namespace MSW.Scripting
 {
-    public class Literal : Expression
+    internal class Literal : Expression
     {
         public readonly object literal;
         public Literal(object literal)

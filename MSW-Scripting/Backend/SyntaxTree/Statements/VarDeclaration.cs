@@ -1,11 +1,11 @@
 ﻿namespace MSW.Scripting
 {
-    public class VarDeclaration : Statement
+    internal class VarDeclaration : Statement
     {
-        public readonly MSWToken token;
+        public readonly Token token;
         public readonly Expression initialiser;
 
-        public VarDeclaration(MSWToken token, Expression initialiser)
+        public VarDeclaration(Token token, Expression initialiser)
         {
             this.token = token;
             this.initialiser = initialiser;

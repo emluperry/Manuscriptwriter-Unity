@@ -1,12 +1,12 @@
 namespace MSW.Scripting
 {
-    public enum MSWTokenType
+    internal enum TokenType
     {
         // Single-Character
         COLON, COMMA, HASH,
         
         // -- Mathematics
-        MINUS, PLUS, MULTIPLY, DIVIDE,
+        MINUS, PLUS, MULTIPLY, DIVIDE, NEGATE,
 
         // Conditionals
         EQUAL, EQUAL_EQUAL, NOT, NOT_EQUAL,
@@ -22,7 +22,7 @@ namespace MSW.Scripting
         TRUE, FALSE, NULL,
 
         // Declarations
-        VAR, FUNCTION,
+        VAR,
         
         // Conditionals
         IF, ELSE,
@@ -34,6 +34,6 @@ namespace MSW.Scripting
         // Functions
         PRINT,
         
-        EOF, EOL, UNIDENTIFIED
+        EOF, EOL, FUNCTION, UNIDENTIFIED, ERROR
     }
 }

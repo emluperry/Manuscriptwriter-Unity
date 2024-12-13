@@ -1,6 +1,6 @@
 namespace MSW.Scripting
 {
-    public interface IMSWExpressionVisitor
+    internal interface IMSWExpressionVisitor
     {
         object VisitBinary(Binary visitor);
         object VisitUnary(Unary visitor);

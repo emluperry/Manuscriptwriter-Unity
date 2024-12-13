@@ -2,10 +2,10 @@
 
 namespace MSW.Scripting
 {
-    public class MSWRuntimeException : SystemException
+    internal class MSWRuntimeException : SystemException
     {
-        public readonly MSWToken operatorToken;
-        public MSWRuntimeException(MSWToken token, string message) : base(message)
+        public readonly Token operatorToken;
+        public MSWRuntimeException(Token token, string message) : base(message)
         {
             this.operatorToken = token;
         }

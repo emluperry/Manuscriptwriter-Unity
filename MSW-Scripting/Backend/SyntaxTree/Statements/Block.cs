@@ -2,7 +2,7 @@
 
 namespace MSW.Scripting
 {
-    public class Block : Statement
+    internal class Block : Statement
     {
         public readonly IEnumerable<Statement> statements;
         public Block(IEnumerable<Statement> statements)

@@ -2,9 +2,9 @@
 
 namespace MSW.Scripting
 {
-    public interface ICallable
+    internal interface ICallable
     {
         int Arity();
-        object Call(MSWInterpreter interpreter, List<object> arguments);
+        object Call(Interpreter interpreter, List<object> arguments);
     }
 }

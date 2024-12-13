@@ -4,14 +4,14 @@ using MSW.Scripting.NativeFunctions;
 
 namespace MSW.Scripting
 {
-    public class MSWInterpreter : IMSWExpressionVisitor, IMSWStatementVisitor
+    internal class Interpreter : IMSWExpressionVisitor, IMSWStatementVisitor
     {
         public Action<MSWRuntimeException> ReportRuntimeError;
 
         private Environment globals;
         private Environment environment;
 
-        public MSWInterpreter()
+        public Interpreter()
         {
             this.globals = new Environment();
             this.environment = globals;
@@ -39,12 +39,6 @@ namespace MSW.Scripting
         private object Evaluate(Expression expr)
         {
             return expr.Accept(this);
-        }
-
-        private object EvaluateCalleeString(string callee)
-        {
-            // env.get doesnt accept a string -> options: force it to accept a string or force the callee line into a token or variable expression.
-            return environment.Get(callee);
         }
 
         private void Execute(Statement statement)
@@ -103,7 +97,7 @@ namespace MSW.Scripting
         
         #region ERRORS + VALIDATION
 
-        private void ValidateNumberOperand(MSWToken op, object operand)
+        private void ValidateNumberOperand(Token op, object operand)
         {
             if (operand is double)
             {
@@ -145,19 +139,19 @@ namespace MSW.Scripting
             switch(visitor.op.type)
             {
                 // ARITHMETIC
-                case MSWTokenType.MINUS:
+                case TokenType.MINUS:
                     this.ValidateNumberOperand(visitor.op, left);
                     this.ValidateNumberOperand(visitor.op, right);
                     return (double)left - (double)right;
-                case MSWTokenType.DIVIDE:
+                case TokenType.DIVIDE:
                     this.ValidateNumberOperand(visitor.op, left);
                     this.ValidateNumberOperand(visitor.op, right);
                     return (double)left / (double)right;
-                case MSWTokenType.MULTIPLY:
+                case TokenType.MULTIPLY:
                     this.ValidateNumberOperand(visitor.op, left);
                     this.ValidateNumberOperand(visitor.op, right);
                     return (double)left * (double)right;
-                case MSWTokenType.PLUS:
+                case TokenType.PLUS:
                     if(left is double ld && right is double rd)
                     {
                         return ld + rd;
@@ -171,27 +165,27 @@ namespace MSW.Scripting
                     throw new MSWRuntimeException(visitor.op, "Operands must be two numbers or two strings.");
 
                 // COMPARISON
-                case MSWTokenType.GREATER:
+                case TokenType.GREATER:
                     this.ValidateNumberOperand(visitor.op, left);
                     this.ValidateNumberOperand(visitor.op, right);
                     return (double)left > (double)right;
-                case MSWTokenType.GREATER_EQUAL:
+                case TokenType.GREATER_EQUAL:
                     this.ValidateNumberOperand(visitor.op, left);
                     this.ValidateNumberOperand(visitor.op, right);
                     return (double)left >= (double)right;
-                case MSWTokenType.LESS:
+                case TokenType.LESS:
                     this.ValidateNumberOperand(visitor.op, left);
                     this.ValidateNumberOperand(visitor.op, right);
                     return (double)left < (double)right;
-                case MSWTokenType.LESS_EQUAL:
+                case TokenType.LESS_EQUAL:
                     this.ValidateNumberOperand(visitor.op, left);
                     this.ValidateNumberOperand(visitor.op, right);
                     return (double)left <= (double)right;
 
                 // EQUALITY
-                case MSWTokenType.EQUAL_EQUAL:
+                case TokenType.EQUAL_EQUAL:
                     return this.IsEqual(left, right);
-                case MSWTokenType.NOT_EQUAL:
+                case TokenType.NOT_EQUAL:
                     return !this.IsEqual(left, right);
             }
 
@@ -204,9 +198,9 @@ namespace MSW.Scripting
 
             switch(visitor.op.type)
             {
-                case MSWTokenType.NOT:
+                case TokenType.NOT:
                     return !IsTrue(right);
-                case MSWTokenType.MINUS:
+                case TokenType.MINUS:
                     this.ValidateNumberOperand(visitor.op, right);
                     return -(double)right;
             }
@@ -218,7 +212,7 @@ namespace MSW.Scripting
         {
             object left = this.Evaluate(visitor.left);
 
-            if(visitor.op.type == MSWTokenType.OR)
+            if(visitor.op.type == TokenType.OR)
             {
                 if(this.IsTrue(left))
                 {
@@ -238,28 +232,13 @@ namespace MSW.Scripting
 
         public object VisitCall(Call visitor)
         {
-            object callee = this.EvaluateCalleeString(visitor.callee);
-            
-            List<object> arguments = new List<object>();
-            foreach (var argument in visitor.arguments)
+            object[] arguments = new object[visitor.arguments.Count];
+            for (int i = 0; i < visitor.arguments.Count; i++)
             {
-                arguments.Add(this.Evaluate(argument));
+                arguments[i] = this.Evaluate(visitor.arguments[i]);
             }
 
-            if (callee is ICallable function)
-            {
-                int arityValue = function.Arity();
-                int argCount = visitor.arguments.Count;
-                if (argCount != arityValue)
-                {
-                    throw new MSWRuntimeException(visitor.calleeToken,
-                        $"Invalid function syntax - expected {argCount} arguments but only found {arityValue}.");
-                }
-                
-                return function.Call(this, arguments);
-            }
-
-            throw new MSWRuntimeException(visitor.calleeToken, "Invalid function syntax!");
+            return visitor.function?.DynamicInvoke(visitor.target, arguments);
         }
 
         #endregion

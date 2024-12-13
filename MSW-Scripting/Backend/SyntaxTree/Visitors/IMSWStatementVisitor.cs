@@ -1,6 +1,6 @@
 ﻿namespace MSW.Scripting
 {
-    public interface IMSWStatementVisitor
+    internal interface IMSWStatementVisitor
     {
         object VisitExpression(StatementExpression visitor);
         object VisitPrint(Print visitor);

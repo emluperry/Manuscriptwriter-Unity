@@ -1,30 +1,98 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using MSW.Reflection;
+using MSW.Scripting;
 
-namespace MSW.Scripting
+namespace MSW.Compiler
 {
-    public class MSWParser
+    internal class Parser
     {
-        public Action<MSWToken, string> ReportTokenError;
-        
-        private Queue<MSWToken> tokens;
+        private struct CustomFunction
+        {
+            public MSWFunctionAttribute attribute;
+            public MethodInfo method;
+            public object instance;
 
-        public MSWParser(Queue<MSWToken> tokens)
+            public CustomFunction(MSWFunctionAttribute attribute, MethodInfo method, object instance)
+            {
+                this.attribute = attribute;
+                this.method = method;
+                this.instance = instance;
+            }
+        }
+        
+        public Action<Token, string> ReportTokenError;
+        
+        private List<Token> tokens;
+        private readonly IReadOnlyList<object> functionLibraries;
+        private List<CustomFunction> functions;
+
+        private int currentIndex = 0;
+
+        public Parser(List<Token> tokens, List<object> functionLibrary = null)
         {
             this.tokens = tokens;
+            this.functionLibraries = functionLibrary;
+
+            if (functionLibrary != null)
+            {
+                this.SetupLibrary(functionLibrary);
+            }
         }
+
+        #region LIBRARIES
+        private void SetupLibrary(IReadOnlyList<object> functionLibrary)
+        {
+            this.functions = new List<CustomFunction>();
+            foreach (var lib in functionLibrary)
+            {
+                var usableMethods = lib.GetType().GetMethods()
+                    .Where(method => method.GetCustomAttributes<MSWFunctionAttribute>().Any());
+
+                foreach (MethodInfo method in usableMethods)
+                {
+                    var attributes = method.GetCustomAttributes<MSWFunctionAttribute>();
+                    foreach (var attr in attributes)
+                    {
+                        this.functions.Add(new CustomFunction(attr, method, lib));
+                    }
+                }
+            }
+        }
+
+        private Func<object, object[], object> GetFunctionFromLine(string line, out List<string> inputs, out object target)
+        {
+            foreach (var function in this.functions)
+            {
+                if (!function.attribute.MatchesSyntax(line))
+                {
+                    continue;
+                }
+
+                inputs = function.attribute.GetInputs(line);
+                target = function.instance;
+                return function.method.Invoke;
+            }
+
+            target = null;
+            inputs = null;
+            return null;
+        }
+        #endregion
 
         public IEnumerable<Statement> Parse()
         {
             List<Statement> statements = new List<Statement>();
-            while(!this.IsEndOfStack())
+            while(!this.IsEndOfQueue())
             {
-                if (this.CurrentMatchesType(MSWTokenType.EOF))
+                if (this.CurrentMatchesType(TokenType.EOF))
                 {
                     break;
                 }
 
-                if (this.TryConsumeToken(MSWTokenType.EOL, out MSWToken eol))
+                if (this.TryConsumeToken(TokenType.EOL, out Token eol))
                 {
                     continue;
                 }
@@ -40,29 +108,31 @@ namespace MSW.Scripting
             return statements;
         }
 
-        private MSWToken TryDequeueToken()
+        private Token TryDequeueToken()
         {
-            if (this.IsEndOfStack())
+            if (this.IsEndOfQueue())
             {
                 return null;
             }
 
-            return this.tokens.Dequeue();
+            var token = this.tokens[this.currentIndex];
+            currentIndex++;
+            return token;
         }
 
-        private MSWToken TryPeekToken()
+        private Token TryPeekToken()
         {
-            if (this.IsEndOfStack())
+            if (this.IsEndOfQueue())
             {
                 return null;
             }
 
-            return this.tokens.Peek();
+            return this.tokens[this.currentIndex];
         }
 
-        private bool CurrentMatchesOneOfTypes(IEnumerable<MSWTokenType> tokenTypes)
+        private bool CurrentMatchesOneOfTypes(IEnumerable<TokenType> tokenTypes)
         {
-            foreach (MSWTokenType tokenType in tokenTypes)
+            foreach (TokenType tokenType in tokenTypes)
             { 
                 if(this.CurrentMatchesType(tokenType))
                 {
@@ -73,16 +143,17 @@ namespace MSW.Scripting
             return false;
         }
 
-        private bool CurrentMatchesType(MSWTokenType tokenType)
+        private bool CurrentMatchesType(TokenType tokenType)
         {
             return TryPeekToken().type == tokenType;
         }
 
-        private bool TryConsumeToken(MSWTokenType type, out MSWToken token)
+        private bool TryConsumeToken(TokenType type, out Token token)
         {
             if (this.CurrentMatchesType(type))
             {
-                token = this.tokens.Dequeue();
+                token = this.tokens[this.currentIndex];
+                currentIndex++;
                 return true;
             }
 
@@ -90,7 +161,7 @@ namespace MSW.Scripting
             return false;
         }
 
-        private bool TryConsumeOneOfTokens(IEnumerable<MSWTokenType> tokenTypes, out MSWToken token)
+        private bool TryConsumeOneOfTokens(IEnumerable<TokenType> tokenTypes, out Token token)
         {
             if (this.CurrentMatchesOneOfTypes(tokenTypes))
             {
@@ -102,7 +173,7 @@ namespace MSW.Scripting
             return false;
         }
 
-        private MSWToken ConsumeToken(MSWTokenType type, string message)
+        private Token ConsumeToken(TokenType type, string message)
         {
             if(this.CurrentMatchesType(type))
             {
@@ -112,9 +183,9 @@ namespace MSW.Scripting
             throw this.ParseError(this.TryPeekToken(), message);
         }
 
-        private MSWToken ConsumeOneOfTokens(List<MSWTokenType> types, string message)
+        private Token ConsumeOneOfTokens(List<TokenType> types, string message)
         {
-            foreach (MSWTokenType tokenType in types)
+            foreach (TokenType tokenType in types)
             {
                 if (this.CurrentMatchesType(tokenType))
                 {
@@ -125,13 +196,13 @@ namespace MSW.Scripting
             throw this.ParseError(this.TryPeekToken(), message);
         }
 
-        private bool IsEndOfStack()
+        private bool IsEndOfQueue()
         {
-            return this.tokens.Count <= 0;
+            return this.currentIndex >= this.tokens.Count;
         }
 
         #region ERROR HANDLING
-        private MSWParseException ParseError(MSWToken token, string message)
+        private MSWParseException ParseError(Token token, string message)
         {
             ReportTokenError?.Invoke(token, message);
 
@@ -142,14 +213,14 @@ namespace MSW.Scripting
         {
             this.TryDequeueToken();
 
-            while(!this.IsEndOfStack())
+            while(!this.IsEndOfQueue())
             {
                 switch(this.TryPeekToken().type)
                 {
-                    case MSWTokenType.EOL:
+                    case TokenType.EOL:
                         this.TryDequeueToken();
                         return;
-                    case MSWTokenType.EOF:
+                    case TokenType.EOF:
                         return;
                 }
 
@@ -164,7 +235,7 @@ namespace MSW.Scripting
         {
             try
             {
-                if (this.TryConsumeToken(MSWTokenType.VAR, out MSWToken var))
+                if (this.TryConsumeToken(TokenType.VAR, out Token var))
                 {
                     return this.VarDeclaration();
                 }
@@ -180,36 +251,36 @@ namespace MSW.Scripting
 
         private Statement VarDeclaration()
         {
-            MSWToken token = this.ConsumeToken(MSWTokenType.IDENTIFIER, "Expect variable name.");
+            Token token = this.ConsumeToken(TokenType.IDENTIFIER, "Expect variable name.");
 
             Expression initialiser = null;
-            if (this.TryConsumeToken(MSWTokenType.EQUAL, out MSWToken equals))
+            if (this.TryConsumeToken(TokenType.EQUAL, out Token equals))
             {
                 initialiser = this.Expression();
             }
 
-            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.COMMA, MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after variable declaration.");
+            this.ConsumeOneOfTokens(new List<TokenType> { TokenType.COMMA, TokenType.EOL, TokenType.EOF }, "Expect end of line after variable declaration.");
             return new VarDeclaration(token, initialiser);
         }
 
         private Statement Statement()
         {
-            if (this.TryConsumeToken(MSWTokenType.FOR, out MSWToken forToken))
+            if (this.TryConsumeToken(TokenType.FOR, out Token forToken))
             {
                 return this.ForStatement();
             }
 
-            if (this.TryConsumeToken(MSWTokenType.IF, out MSWToken ifToken))
+            if (this.TryConsumeToken(TokenType.IF, out Token ifToken))
             {
                 return this.IfStatement();
             }
 
-            if(this.TryConsumeToken(MSWTokenType.WHILE, out MSWToken whileToken))
+            if(this.TryConsumeToken(TokenType.WHILE, out Token whileToken))
             {
                 return this.WhileStatement();
             }
             
-            if (this.TryConsumeToken(MSWTokenType.PRINT, out MSWToken printToken))
+            if (this.TryConsumeToken(TokenType.PRINT, out Token printToken))
             {
                 return this.PrintStatement();
             }
@@ -220,7 +291,7 @@ namespace MSW.Scripting
         private Statement ExpressionStatement()
         {
             Expression value = this.Expression();
-            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.COMMA, MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.");
+            this.ConsumeOneOfTokens(new List<TokenType> { TokenType.COMMA, TokenType.EOL, TokenType.EOF }, "Expect end of line after value.");
             return new StatementExpression(value);
         }
 
@@ -228,13 +299,13 @@ namespace MSW.Scripting
         {
             Expression condition = this.Expression();
 
-            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after if condition.");
+            this.ConsumeToken(TokenType.COMMA, "Expect comma after if condition.");
 
             Statement thenBranch = this.Statement();
             Statement elseBranch = null;
-            if(this.TryConsumeToken(MSWTokenType.ELSE, out MSWToken elseToken))
+            if(this.TryConsumeToken(TokenType.ELSE, out Token elseToken))
             {
-                this.TryConsumeToken(MSWTokenType.COMMA, out MSWToken commaToken); // An additional comma after an else is not necessary, but may be used as a style choice.
+                this.TryConsumeToken(TokenType.COMMA, out Token commaToken); // An additional comma after an else is not necessary, but may be used as a style choice.
 
                 elseBranch = this.Statement();
             }
@@ -245,7 +316,7 @@ namespace MSW.Scripting
         private Statement WhileStatement()
         {
             Expression condition = this.Expression();
-            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after if condition.");
+            this.ConsumeToken(TokenType.COMMA, "Expect comma after if condition.");
             Statement statement = this.Statement();
 
             return new While(condition, statement);
@@ -254,7 +325,7 @@ namespace MSW.Scripting
         private Statement ForStatement()
         {
             Statement initialiser = null;
-            if(this.TryConsumeToken(MSWTokenType.VAR, out MSWToken var))
+            if(this.TryConsumeToken(TokenType.VAR, out Token var))
             {
                 initialiser = this.VarDeclaration();
             }
@@ -265,10 +336,10 @@ namespace MSW.Scripting
             }
 
             Expression condition = this.Expression();
-            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after loop condition.");
+            this.ConsumeToken(TokenType.COMMA, "Expect comma after loop condition.");
 
             Expression increment = this.Expression();
-            this.ConsumeToken(MSWTokenType.COMMA, "Expect comma after loop increment.");
+            this.ConsumeToken(TokenType.COMMA, "Expect comma after loop increment.");
 
             Statement body = this.Statement();
 
@@ -292,7 +363,7 @@ namespace MSW.Scripting
         private Statement PrintStatement()
         {
             Expression value = this.Expression();
-            this.ConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.EOL, MSWTokenType.EOF }, "Expect end of line after value.");
+            this.ConsumeOneOfTokens(new List<TokenType> { TokenType.EOL, TokenType.EOF }, "Expect end of line after value.");
             return new Print(value);
         }
 
@@ -308,13 +379,13 @@ namespace MSW.Scripting
         {
             Expression expression = this.Or();
 
-            if(this.TryConsumeToken(MSWTokenType.EQUAL, out MSWToken equals))
+            if(this.TryConsumeToken(TokenType.EQUAL, out Token equals))
             {
                 Expression value = this.Assignment();
 
                 if(expression is Variable var)
                 {
-                    MSWToken token = var.token;
+                    Token token = var.token;
                     return new Assign(token, value);
                 }
 
@@ -328,7 +399,7 @@ namespace MSW.Scripting
         {
             Expression expression = this.And();
 
-            while(this.TryConsumeToken(MSWTokenType.OR, out MSWToken op))
+            while(this.TryConsumeToken(TokenType.OR, out Token op))
             {
                 Expression right = this.And();
                 expression = new Logical(expression, op, right);
@@ -341,7 +412,7 @@ namespace MSW.Scripting
         {
             Expression expression = this.Equality();
 
-            while (this.TryConsumeToken(MSWTokenType.AND, out MSWToken op))
+            while (this.TryConsumeToken(TokenType.AND, out Token op))
             {
                 Expression right = this.Equality();
                 expression = new Logical(expression, op, right);
@@ -354,7 +425,7 @@ namespace MSW.Scripting
         {
             Expression expression = this.Comparison();
 
-            while(this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.NOT_EQUAL, MSWTokenType.EQUAL_EQUAL }, out MSWToken op))
+            while(this.TryConsumeOneOfTokens(new List<TokenType> { TokenType.NOT_EQUAL, TokenType.EQUAL_EQUAL }, out Token op))
             {
                 Expression right = this.Comparison();
                 expression = new Binary(expression, op, right);
@@ -367,7 +438,7 @@ namespace MSW.Scripting
         {
             Expression expression = this.Term();
 
-            while(this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.GREATER, MSWTokenType.GREATER_EQUAL, MSWTokenType.LESS, MSWTokenType.LESS_EQUAL}, out MSWToken op))
+            while(this.TryConsumeOneOfTokens(new List<TokenType> { TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL}, out Token op))
             {
                 Expression right = this.Term();
                 expression = new Binary(expression, op, right);
@@ -380,7 +451,7 @@ namespace MSW.Scripting
         {
             Expression expression = this.Factor();
 
-            while(this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.MINUS, MSWTokenType.PLUS }, out MSWToken op))
+            while(this.TryConsumeOneOfTokens(new List<TokenType> { TokenType.MINUS, TokenType.PLUS }, out Token op))
             {
                 Expression right = this.Factor();
                 expression = new Binary(expression, op, right);
@@ -393,7 +464,7 @@ namespace MSW.Scripting
         {
             Expression expression = this.Unary();
 
-            while(this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.MULTIPLY, MSWTokenType.DIVIDE }, out MSWToken op))
+            while(this.TryConsumeOneOfTokens(new List<TokenType> { TokenType.MULTIPLY, TokenType.DIVIDE }, out Token op))
             {
                 Expression right = this.Unary();
                 expression = new Binary(expression, op, right);
@@ -404,7 +475,7 @@ namespace MSW.Scripting
 
         private Expression Unary()
         {
-            if(this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.NOT, MSWTokenType.MINUS }, out MSWToken op))
+            if(this.TryConsumeOneOfTokens(new List<TokenType> { TokenType.NOT, TokenType.MINUS }, out Token op))
             {
                 Expression right = this.Unary();
                 return new Unary(op, right);
@@ -415,42 +486,59 @@ namespace MSW.Scripting
 
         private Expression Call()
         {
-            Expression expression = this.Primary();
-            
-            // How are we going to pull functions from external "libraries"?
-            if (this.TryConsumeToken(MSWTokenType.COLON, out MSWToken op))
+            if (this.TryConsumeToken(TokenType.FUNCTION, out Token function))
             {
-                 // Dialogue
-                 Expression dialogue = this.Primary();
-                 
-                 // Need to make this into an expression -> best to use call I think, but need to figure how best to do so.
-                 return new Call("RunDialogue", op, new List<Expression>() { expression, dialogue });
+                Delegate func = this.GetFunctionFromLine(function.lexeme, out List<string> arguments, out object target);
+
+                if (func == null)
+                {
+                    throw this.ParseError(function, "Invalid instruction! Check spelling.");
+                }
+
+                List<Expression> args = new List<Expression>();
+                // convert inputs into expressions
+                foreach (var arg in arguments)
+                {
+                    args.Add(this.ConvertStringArgumentToToken(arg));
+                }
+                
+                // return new call with expressions
+                return new Call(function, func, target, args);
             }
             
-            return expression;
+            // // How are we going to pull functions from external "libraries"?
+            // if (this.TryConsumeToken(TokenType.COLON, out Token op))
+            // {
+            //      // Dialogue
+            //      Expression dialogue = this.Primary();
+            //      
+            //      return new Call("RunDialogue", op, new List<Expression>() { expression, dialogue });
+            // }
+            
+            return this.Primary();
         }
 
         private Expression Primary()
         {
-            if(this.TryConsumeToken(MSWTokenType.FALSE, out MSWToken opf))
+            if(this.TryConsumeToken(TokenType.FALSE, out Token opf))
             {
                 return new Literal(false);
             }
-            if (this.TryConsumeToken(MSWTokenType.TRUE, out MSWToken opt))
+            if (this.TryConsumeToken(TokenType.TRUE, out Token opt))
             {
                 return new Literal(true);
             }
-            if (this.TryConsumeToken(MSWTokenType.NULL, out MSWToken opn))
+            if (this.TryConsumeToken(TokenType.NULL, out Token opn))
             {
                 return new Literal(null);
             }
 
-            if (this.TryConsumeOneOfTokens(new List<MSWTokenType> { MSWTokenType.STRING, MSWTokenType.DOUBLE }, out MSWToken opl))
+            if (this.TryConsumeOneOfTokens(new List<TokenType> { TokenType.STRING, TokenType.DOUBLE }, out Token opl))
             {
                 return new Literal(opl.literal);
             }
 
-            if(this.TryConsumeToken(MSWTokenType.IDENTIFIER, out MSWToken opv))
+            if(this.TryConsumeToken(TokenType.IDENTIFIER, out Token opv))
             {
                 return new Variable(opv);
             }
@@ -458,6 +546,15 @@ namespace MSW.Scripting
             throw ParseError(this.TryPeekToken(), "Expect expression.");
         }
 
+        #endregion
+        
+        #region ARGUMENT HANDLING
+
+        private Expression ConvertStringArgumentToToken(string argument)
+        {
+            return new Literal(argument);
+        }
+        
         #endregion
     }
 }

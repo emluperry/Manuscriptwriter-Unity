@@ -1,6 +1,6 @@
 ﻿namespace MSW.Scripting
 {
-    public class StatementExpression : Statement
+    internal class StatementExpression : Statement
     {
         public readonly Expression expression;
         public StatementExpression(Expression expression)

@@ -1,6 +1,6 @@
 namespace MSW.Scripting
 {
-    public class Grouping : Expression
+    internal class Grouping : Expression
     {
         public readonly Expression expression;
         public Grouping(Expression exp)

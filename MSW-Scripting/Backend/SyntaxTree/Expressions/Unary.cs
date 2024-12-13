@@ -1,10 +1,10 @@
 namespace MSW.Scripting
 {
-    public class Unary : Expression
+    internal class Unary : Expression
     {
-        public readonly MSWToken op;
+        public readonly Token op;
         public readonly Expression right;
-        public Unary(MSWToken op, Expression right)
+        public Unary(Token op, Expression right)
         {
             this.op = op;
             this.right = right;

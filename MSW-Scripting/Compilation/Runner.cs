@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 
-namespace MSW.Scripting
+using MSW.Scripting;
+namespace MSW.Compiler
 {
-    public class MSWRunner
+    public class Runner
     {
         public readonly List<object> FunctionLibrary;
         
@@ -12,7 +13,7 @@ namespace MSW.Scripting
 
         private bool hasError = false;
 
-        public MSWRunner(List<object> functions = null)
+        public Runner(List<object> functions = null)
         {
             FunctionLibrary = functions;
         }
@@ -21,10 +22,10 @@ namespace MSW.Scripting
         {
             hasError = false;
 
-            MSWScanner scanner = new MSWScanner(source) { ReportError = ReportScannerError };
-            Queue<MSWToken> tokens = scanner.ScanTokens();
+            Scanner scanner = new Scanner(source);
+            List<Token> tokens = scanner.ScanLines();
 
-            MSWParser parser = new MSWParser(tokens) { ReportTokenError = ReportTokenError };
+            Parser parser = new Parser(tokens, FunctionLibrary) { ReportTokenError = ReportTokenError };
             IEnumerable<Statement> statements = parser.Parse();
 
             if(hasError)
@@ -32,14 +33,14 @@ namespace MSW.Scripting
                 return;
             }
 
-            MSWInterpreter interpreter = new MSWInterpreter() { ReportRuntimeError = ReportRuntimeError };
+            Interpreter interpreter = new Interpreter() { ReportRuntimeError = ReportRuntimeError };
             interpreter.Interpret(statements);
         }
 
-        private void ReportTokenError(MSWToken token, string message)
+        private void ReportTokenError(Token token, string message)
         {
             hasError = true;
-            if(token?.type == MSWTokenType.EOF)
+            if(token?.type == TokenType.EOF)
             {
                 Report(token.line, "at end", message);
             }

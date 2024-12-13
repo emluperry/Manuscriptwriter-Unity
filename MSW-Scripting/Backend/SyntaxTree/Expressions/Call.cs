@@ -1,18 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MSW.Scripting
 {
-    public class Call : Expression
+    internal class Call : Expression
     {
-        public readonly string callee;
-        // Needed for debugging purposes.
-        public readonly MSWToken calleeToken;
+        public readonly Token callToken;
+        public readonly Delegate function;
+        public readonly object target;
         public readonly List<Expression> arguments;
         
-        public Call(string callee, MSWToken calleeToken, List<Expression> arguments)
+        public Call(Token callToken, Delegate function, object target, List<Expression> arguments)
         {
-            this.callee = callee;
-            this.calleeToken = calleeToken;
+            this.callToken = callToken;
+            this.function = function;
+            this.target = target;
             this.arguments = arguments;
         }
 

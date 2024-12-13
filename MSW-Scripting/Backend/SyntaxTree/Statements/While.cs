@@ -1,6 +1,6 @@
 ﻿namespace MSW.Scripting
 {
-    public class While : Statement
+    internal class While : Statement
     {
         public readonly Expression condition;
         public readonly Statement statement;

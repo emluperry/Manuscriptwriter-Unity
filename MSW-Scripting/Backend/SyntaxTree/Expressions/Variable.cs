@@ -1,9 +1,9 @@
 ﻿namespace MSW.Scripting
 {
-    public class Variable : Expression
+    internal class Variable : Expression
     {
-        public readonly MSWToken token;
-        public Variable(MSWToken token)
+        public readonly Token token;
+        public Variable(Token token)
         {
             this.token = token;
         }
