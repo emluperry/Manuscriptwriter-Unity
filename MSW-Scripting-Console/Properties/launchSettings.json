@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MSW-Scripting-Console": {
+      "commandName": "Project",
+      "commandLineArgs": "D:\\Coding\\Manuscriptwriter\\Assets\\Resources\\Narratives\\Testing\\temp.txt"
+    }
+  }
+}
