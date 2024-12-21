@@ -1,7 +1,10 @@
 {
-    "name": "MSW-Scripting-Unity",
-    "rootNamespace": "MSW.Scripting.Unity",
-    "references": [],
+    "name": "Demo-UI",
+    "rootNamespace": "Demo.UI",
+    "references": [
+        "GUID:883789f1c68973c4e95b13f66521fb2c",
+        "GUID:326274b07fa14534788730b6572c5be5"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -1,10 +1,13 @@
 using UnityEngine;
 using UnityEngine.Search;
 
-namespace MSW.Scripting.Unity
+using MSW.Compiler;
+namespace MSW.Unity
 {
     public class Storyteller : MonoBehaviour
     {
+        [SerializeField] private MSWUnityLibrary[] libraries;
+        private Compiler.Compiler compiler;
         //private void Awake()
         //{
         //    this.RegisterSceneObjects();
@@ -26,12 +29,12 @@ namespace MSW.Scripting.Unity
             
         //}
 
-        // DEBUG ONLY !!!
+        // DEBUG !!!
         [SerializeField]
         [SearchContext("ext:txt dir:Resources")] // QOL: Limit the files to ONLY project text files within Resources. 
         private TextAsset testScript;
 
-        private MSWRunner runner;
+        private Runner runner;
 
         private void Start()
         {
@@ -40,13 +43,33 @@ namespace MSW.Scripting.Unity
                 return;
             }
 
-            runner = new MSWRunner() { ErrorLogger = this.LogError };
-            runner.Run(testScript.text);
+            compiler = new Compiler.Compiler()
+            {
+                ErrorLogger = Logger,
+                FunctionLibrary = libraries,
+            };
+            var script = compiler.Compile(testScript.text);
+
+            runner = new Runner(script)
+            {
+                Logger = Logger,
+                OnFinish = CleanupOnFinish,
+            };
+            
+            runner.Run();
         }
 
-        private void LogError(string message)
+        private void Logger(string message)
         {
             Debug.LogError(message); 
+        }
+
+        private void CleanupOnFinish()
+        {
+            foreach (var library in this.libraries)
+            {
+                library.Cleanup();
+            }
         }
     }
 }
