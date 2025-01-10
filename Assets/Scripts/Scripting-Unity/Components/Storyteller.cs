@@ -3,13 +3,20 @@ using UnityEngine;
 using UnityEngine.Search;
 
 using MSW.Compiler;
+using UnityEngine.Serialization;
 using Object = UnityEngine.Object;
 
 namespace MSW.Unity
 {
     public class Storyteller : MonoBehaviour
     {
+        [Header("Run on Start")]
+        [SerializeField] [SearchContext("ext:txt dir:Resources")] // QOL: Limit the files to ONLY project text files within Resources. 
+        private TextAsset startupScript;
+        
+        [Header("Storyteller Commands")]
         [SerializeField] private MSWUnityLibrary[] libraries;
+        
         private Compiler.Compiler compiler;
         private Runner runner;
         
@@ -24,6 +31,16 @@ namespace MSW.Unity
             this.RegisterSceneObjects();
         }
 
+        private void Start()
+        {
+            if(!startupScript)
+            {
+                return;
+            }
+            
+            this.RunScript(startupScript.text);
+        }
+
         private void OnDestroy()
         {
             this.CleanupOnFinish();
@@ -36,7 +53,7 @@ namespace MSW.Unity
 
             foreach (var actionComponent in actionComponents)
             {
-                actionComponent.RunScript = this.RunScript;
+                this.RunScript(actionComponent.ActionScript.text);
             }
         }
 
@@ -62,21 +79,7 @@ namespace MSW.Unity
         }
 
         #region DEBUGGING
-
-        [SerializeField]
-        [SearchContext("ext:txt dir:Resources")] // QOL: Limit the files to ONLY project text files within Resources. 
-        private TextAsset testScript;
-
-        private void Start()
-        {
-            if(!testScript)
-            {
-                return;
-            }
-            
-            this.RunScript(testScript.text);
-        }
-
+        
         private void Logger(string message)
         {
             Debug.LogError(message); 

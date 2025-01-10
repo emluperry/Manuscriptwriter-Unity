@@ -10,13 +10,11 @@ namespace Demo.Entity
 
         private void OnTriggerEnter(Collider collision)
         {
-            Debug.Log("Overlap trigger.");
             TriggerEnter?.Invoke(collision);
         }
 
         private void OnTriggerExit(Collider collision)
         {
-            Debug.Log("Exit trigger.");
             TriggerExit?.Invoke(collision);
         }
     }

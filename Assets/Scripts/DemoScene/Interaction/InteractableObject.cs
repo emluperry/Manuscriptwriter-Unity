@@ -22,9 +22,7 @@ namespace Demo.Interaction
         
         public virtual void StartInteract(string interactor)
         {
-            Debug.Log($"Interacted with {this.gameObject.name}.");
-            
-            // This isn't perfect, but works for now.
+            // TODO: Get argument details from separate component/internal variables?
             OnInteract?.FireEvent(this, new RunnerEventArgs(new List<object>() {interactor, this.gameObject.name}));
         }
 

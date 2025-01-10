@@ -42,8 +42,7 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 13
-  m_BakeOnSceneLoad: 0
+  serializedVersion: 12
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -279,6 +278,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4161803580467368168, guid: b5f53a233eb90a44caeb18847b61b1e3, type: 3}
+      propertyPath: actionScript
+      value: 
+      objectReference: {fileID: 4900000, guid: c6965c5ceb3de0c4998dfecd6d2966ff, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -723,6 +726,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4161803580467368168, guid: b5f53a233eb90a44caeb18847b61b1e3, type: 3}
+      propertyPath: actionScript
+      value: 
+      objectReference: {fileID: 4900000, guid: ef14a82b788dbbc458f22c91304fdb9b, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

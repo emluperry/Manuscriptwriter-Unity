@@ -73,7 +73,6 @@ namespace Demo.Player
 
         private void HandleInteraction(InputAction.CallbackContext obj)
         {
-            //this.interactionEvent.FireEvent(this, new RunnerEventArgs(new List<object>() {"the player", "me"}));
             this.target.StartInteract("the player");
         }
     }

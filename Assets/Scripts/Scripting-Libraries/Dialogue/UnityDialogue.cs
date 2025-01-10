@@ -30,6 +30,7 @@ namespace MSW.Unity.Dialogue
         private void Awake()
         {
             this.canvas = this.GetComponentInChildren<Canvas>(true);
+            this.canvas.gameObject.SetActive(false);
         }
 
         #region MSW Functions
@@ -45,8 +46,6 @@ namespace MSW.Unity.Dialogue
             
             this.speakerTextBox.text = speaker;
             this.dialogueTextBox.text = line;
-            
-            Debug.Log($"{speaker} says: {line}");
             
             context.WaitForEvent(continueAction);
             return null;

@@ -16,9 +16,9 @@ namespace Demo.Input
             this.playerInput = this.GetComponent<PlayerInput>();
             
             this.playerInput.actions = inputActions.asset;
-            this.playerInput.defaultActionMap = inputActions.UI.Get().name;
+            this.playerInput.defaultActionMap = inputActions.Player.Get().name;
             
-            this.playerInput.currentActionMap = inputActions.UI;
+            this.playerInput.currentActionMap = inputActions.Player;
 
             foreach (var inputComponent in FindObjectsByType<InputSetup>(FindObjectsSortMode.None))
             {
