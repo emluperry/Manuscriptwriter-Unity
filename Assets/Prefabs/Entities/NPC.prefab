@@ -154,6 +154,9 @@ PrefabInstance:
       addedObject: {fileID: 2443257321487714211}
     - targetCorrespondingSourceObject: {fileID: 6701276416406234786, guid: e8ad6c085a860e8429e8efa7eb20c600, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 5345615517246942783}
+    - targetCorrespondingSourceObject: {fileID: 6701276416406234786, guid: e8ad6c085a860e8429e8efa7eb20c600, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 4161803580467368168}
   m_SourcePrefab: {fileID: 100100000, guid: e8ad6c085a860e8429e8efa7eb20c600, type: 3}
 --- !u!1 &1594612636575487614 stripped
@@ -197,6 +200,18 @@ MonoBehaviour:
   interactionIcon: {fileID: 11400000, guid: 8a6d465494866e047b840404c1c45f25, type: 2}
   iconRenderer: {fileID: 3961282151206054560}
   OnInteract: {fileID: 11400000, guid: 13b67ef4c122d2648a1658ff6ef42703, type: 2}
+--- !u!114 &5345615517246942783
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1594612636575487614}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da37302138706764d999325bf30c0052, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &4161803580467368168
 MonoBehaviour:
   m_ObjectHideFlags: 0

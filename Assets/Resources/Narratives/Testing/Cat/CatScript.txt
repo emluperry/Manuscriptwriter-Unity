@@ -1,0 +1,2 @@
+When the player speaks with Cat
+Cat: Meows.

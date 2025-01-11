@@ -9,9 +9,14 @@ namespace MSW.Unity
 {
     public class Storyteller : MonoBehaviour
     {
+        [Header("Run on Start")]
+        [SerializeField] [SearchContext("ext:txt dir:Resources")] // QOL: Limit the files to ONLY project text files within Resources. 
+        private TextAsset startupScript;
+        
+        [Header("Storyteller Commands")]
         [SerializeField] private MSWUnityLibrary[] libraries;
+        
         private Compiler.Compiler compiler;
-        private Runner runner;
         
         private void Awake()
         {
@@ -22,6 +27,16 @@ namespace MSW.Unity
             };
             
             this.RegisterSceneObjects();
+        }
+
+        private void Start()
+        {
+            if(!startupScript)
+            {
+                return;
+            }
+            
+            this.GetRunScript(startupScript.text)?.Invoke();
         }
 
         private void OnDestroy()
@@ -36,20 +51,25 @@ namespace MSW.Unity
 
             foreach (var actionComponent in actionComponents)
             {
-                actionComponent.RunScript = this.RunScript;
+                this.GetRunScript(actionComponent.ActionScript.text)?.Invoke();
             }
         }
 
-        private void RunScript(string script)
+        private Action GetRunScript(string script)
         {
             var manuscript = compiler.Compile(script);
 
-            runner = new Runner(manuscript)
+            var runner = new Runner(manuscript)
             {
                 Logger = Logger,
                 OnFinish = CleanupOnFinish,
             };
-            
+
+            return () => this.RunScript(runner);
+        }
+
+        private void RunScript(Runner runner)
+        {
             runner.Run();
         }
         
@@ -62,21 +82,7 @@ namespace MSW.Unity
         }
 
         #region DEBUGGING
-
-        [SerializeField]
-        [SearchContext("ext:txt dir:Resources")] // QOL: Limit the files to ONLY project text files within Resources. 
-        private TextAsset testScript;
-
-        private void Start()
-        {
-            if(!testScript)
-            {
-                return;
-            }
-            
-            this.RunScript(testScript.text);
-        }
-
+        
         private void Logger(string message)
         {
             Debug.LogError(message); 
