@@ -26,12 +26,22 @@ namespace MSW.Unity.Events
 
         public void ClearAllEvents()
         {
+            if (eventInstance == null)
+            {
+                return;
+            }
+            
             foreach (var del in this.eventInstance.GetInvocationList())
             {
                 this.eventInstance -= (EventHandler<IRunnerEventArgs>)del;
             }
 
             this.eventInstance = null;
+        }
+
+        private void OnDestroy()
+        {
+            this.ClearAllEvents();
         }
     }
 }

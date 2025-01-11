@@ -10,5 +10,7 @@ namespace MSW.Unity
         private TextAsset actionScript;
         
         public TextAsset ActionScript => actionScript;
+
+        public Action RunScript;
     }
 }

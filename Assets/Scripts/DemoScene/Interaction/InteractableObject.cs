@@ -6,8 +6,11 @@ using UnityEngine;
 
 namespace Demo.Interaction
 {
+    [RequireComponent(typeof(Descriptor))]
     public class InteractableObject : MonoBehaviour
     {
+        private Descriptor objectDescriptor;
+        
         [Header("UI References")]
         [SerializeField] private InteractionIcon interactionIcon;
         [SerializeField] private SpriteRenderer iconRenderer;
@@ -18,12 +21,13 @@ namespace Demo.Interaction
         {
             iconRenderer.sprite = interactionIcon.InteractionImage;
             iconRenderer.enabled = false;
+
+            this.objectDescriptor = this.GetComponent<Descriptor>();
         }
         
         public virtual void StartInteract(string interactor)
         {
-            // TODO: Get argument details from separate component/internal variables?
-            OnInteract?.FireEvent(this, new RunnerEventArgs(new List<object>() {interactor, this.gameObject.name}));
+            OnInteract?.FireEvent(this, new RunnerEventArgs(new List<object>() {interactor, this.objectDescriptor.ObjectName}));
         }
 
         public virtual void OnOverlap()

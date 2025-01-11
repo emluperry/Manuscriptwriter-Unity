@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.Search;
 
 using MSW.Compiler;
-using UnityEngine.Serialization;
 using Object = UnityEngine.Object;
 
 namespace MSW.Unity
@@ -18,7 +17,6 @@ namespace MSW.Unity
         [SerializeField] private MSWUnityLibrary[] libraries;
         
         private Compiler.Compiler compiler;
-        private Runner runner;
         
         private void Awake()
         {
@@ -38,7 +36,7 @@ namespace MSW.Unity
                 return;
             }
             
-            this.RunScript(startupScript.text);
+            this.GetRunScript(startupScript.text)?.Invoke();
         }
 
         private void OnDestroy()
@@ -53,20 +51,25 @@ namespace MSW.Unity
 
             foreach (var actionComponent in actionComponents)
             {
-                this.RunScript(actionComponent.ActionScript.text);
+                this.GetRunScript(actionComponent.ActionScript.text)?.Invoke();
             }
         }
 
-        private void RunScript(string script)
+        private Action GetRunScript(string script)
         {
             var manuscript = compiler.Compile(script);
 
-            runner = new Runner(manuscript)
+            var runner = new Runner(manuscript)
             {
                 Logger = Logger,
                 OnFinish = CleanupOnFinish,
             };
-            
+
+            return () => this.RunScript(runner);
+        }
+
+        private void RunScript(Runner runner)
+        {
             runner.Run();
         }
         
