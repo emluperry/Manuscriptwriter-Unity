@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Search;
 
@@ -15,6 +16,8 @@ namespace MSW.Unity
         
         [Header("Storyteller Commands")]
         [SerializeField] private MSWUnityLibrary[] libraries;
+
+        private Dictionary<string, Descriptor> actors;
         
         private Compiler.Compiler compiler;
         
@@ -26,7 +29,8 @@ namespace MSW.Unity
                 FunctionLibrary = libraries,
             };
             
-            this.RegisterSceneObjects();
+            this.SetupLibraries();
+            this.SetupSceneObjects();
         }
 
         private void Start()
@@ -44,16 +48,33 @@ namespace MSW.Unity
             this.CleanupOnFinish();
         }
 
-        private void RegisterSceneObjects()
+        private void SetupLibraries()
         {
+            foreach (var library in libraries)
+            {
+                library.GetObjectWithName = this.GetObjectWithName;
+            }
+        }
+
+        private void SetupSceneObjects()
+        {
+            this.actors = new Dictionary<string, Descriptor>();
+            
+            var objects = Object.FindObjectsByType<Descriptor>(FindObjectsSortMode.None);
+            foreach (var obj in objects)
+            {
+                this.actors[obj.ObjectName] = obj;
+            }
+            
             // Get all Action components within the scene.
             var actionComponents = Object.FindObjectsByType<Actions>(FindObjectsSortMode.None);
-
             foreach (var actionComponent in actionComponents)
             {
                 this.GetRunScript(actionComponent.ActionScript.text)?.Invoke();
             }
         }
+
+        #region ManuscriptWriter
 
         private Action GetRunScript(string script)
         {
@@ -80,6 +101,17 @@ namespace MSW.Unity
                 library.Cleanup();
             }
         }
+
+        #endregion
+
+        #region Utilities
+
+        private Descriptor GetObjectWithName(string name)
+        {
+            return this.actors.GetValueOrDefault(name);
+        }
+
+        #endregion
 
         #region DEBUGGING
         

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using MSW.Events;
 using MSW.Unity.Events;
+using MSW.Unity;
 using UnityEngine;
 
 namespace Demo.Interaction
@@ -27,7 +28,9 @@ namespace Demo.Interaction
         
         public virtual void StartInteract(string interactor)
         {
+            iconRenderer.enabled = false;
             OnInteract?.FireEvent(this, new RunnerEventArgs(new List<object>() {interactor, this.objectDescriptor.ObjectName}));
+            iconRenderer.enabled = true;
         }
 
         public virtual void OnOverlap()

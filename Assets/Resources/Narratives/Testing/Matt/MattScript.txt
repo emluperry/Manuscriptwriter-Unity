@@ -1,4 +1,4 @@
 When the player speaks with Matt
-# Say "HELLO????????"
-Matt: Exterminate!
+Matt barks: <color="red>EXTERMINATE!</color>
+Matt barks: EXTERMINATE!!!!!!
 Matt: The Daleks will exterminate!

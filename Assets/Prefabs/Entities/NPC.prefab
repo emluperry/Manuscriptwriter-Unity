@@ -75,7 +75,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 5697fd2710c098a4ab8622e0d8c4f7ee, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -147,14 +147,11 @@ PrefabInstance:
       addedObject: {fileID: 5875172743553390889}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6701276416406234786, guid: e8ad6c085a860e8429e8efa7eb20c600, type: 3}
-      insertIndex: -1
+      insertIndex: 1
       addedObject: {fileID: 2064379763982503044}
     - targetCorrespondingSourceObject: {fileID: 6701276416406234786, guid: e8ad6c085a860e8429e8efa7eb20c600, type: 3}
-      insertIndex: -1
+      insertIndex: 2
       addedObject: {fileID: 2443257321487714211}
-    - targetCorrespondingSourceObject: {fileID: 6701276416406234786, guid: e8ad6c085a860e8429e8efa7eb20c600, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5345615517246942783}
     - targetCorrespondingSourceObject: {fileID: 6701276416406234786, guid: e8ad6c085a860e8429e8efa7eb20c600, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4161803580467368168}
@@ -200,18 +197,6 @@ MonoBehaviour:
   interactionIcon: {fileID: 11400000, guid: 8a6d465494866e047b840404c1c45f25, type: 2}
   iconRenderer: {fileID: 3961282151206054560}
   OnInteract: {fileID: 11400000, guid: 13b67ef4c122d2648a1658ff6ef42703, type: 2}
---- !u!114 &5345615517246942783
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1594612636575487614}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da37302138706764d999325bf30c0052, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &4161803580467368168
 MonoBehaviour:
   m_ObjectHideFlags: 0

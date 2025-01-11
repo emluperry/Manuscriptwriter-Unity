@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Demo.Input;
+using Demo.UI;
 using MSW.Events;
 using MSW.Reflection;
 using UnityEngine;
@@ -34,6 +36,26 @@ namespace MSW.Unity.Dialogue
         }
 
         #region MSW Functions
+        
+        [MSWFunction("{0} barks: {1}")]
+        public object RunBark(Context context, string speaker, string line)
+        {
+            // get the target of the bark from the speaker
+            var target = this.GetObjectWithName(speaker);
+            if (target == null)
+            {
+                return null;
+            }
+            var targetCanvas = target.GetComponentInChildren<BarkCanvas>(true);
+            if (targetCanvas == null)
+            {
+                return null;
+            }
+            
+            targetCanvas.Bark(line);
+            
+            return null;
+        }
         
         [MSWFunction("{0}: {1}")]
         public object RunDialogue(Context context, string speaker, string line)
