@@ -358,7 +358,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7689324829422536704}
-  - component: {fileID: 9131149197087372208}
   - component: {fileID: 2219549620445459727}
   m_Layer: 5
   m_Name: DialogueUI
@@ -387,18 +386,6 @@ RectTransform:
   m_AnchoredPosition: {x: 446, y: 251}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &9131149197087372208
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8523205337393847905}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 436e6dcb413fb1c4fb8518e0ad821660, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2219549620445459727
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -411,8 +398,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c854ee5b68ee14f4eb202ca0df9e8cb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speakerTextBox: {fileID: 6011354687653424447}
-  dialogueTextBox: {fileID: 2286988473805829731}
   interactionEvent: {fileID: 11400000, guid: 13b67ef4c122d2648a1658ff6ef42703, type: 2}
 --- !u!1 &8960914233734897100
 GameObject:
@@ -426,6 +411,8 @@ GameObject:
   - component: {fileID: 6396561196416875693}
   - component: {fileID: 5539763701344959981}
   - component: {fileID: 4018339685718641702}
+  - component: {fileID: 236976186280938292}
+  - component: {fileID: 7929537456548936691}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -516,6 +503,32 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &236976186280938292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8960914233734897100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 436e6dcb413fb1c4fb8518e0ad821660, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7929537456548936691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8960914233734897100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d386b90760ad7d468dfac730e2a43e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speakerTextBox: {fileID: 6011354687653424447}
+  dialogueTextBox: {fileID: 2286988473805829731}
 --- !u!1 &9071280151086267232
 GameObject:
   m_ObjectHideFlags: 0

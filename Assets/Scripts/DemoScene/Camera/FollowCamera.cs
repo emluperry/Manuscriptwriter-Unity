@@ -1,12 +1,11 @@
-using System;
 using System.Collections;
 using System.Linq;
-using Unity.Collections;
+using MSW.Unity.Camera;
 using UnityEngine;
 
 namespace Demo.Camera
 {
-    public class FollowCamera : MonoBehaviour
+    public class FollowCamera : MonoBehaviour, ICameraCommands
     {
         [Header("Movement")]
         [SerializeField] private float cameraSpeed = 5f;
