@@ -12,6 +12,7 @@ namespace MSW.Unity.Dialogue
     public class UnityDialogue : MSWUnityLibrary
     {
         private DialogueCanvas canvas;
+        [SerializeField] private EmotionObject[] emotions;
 
         #region MSW Events
         
@@ -27,6 +28,37 @@ namespace MSW.Unity.Dialogue
         }
 
         #region MSW Functions
+
+        [MSWFunction("{0} feels {1}.")]
+        public object RunEmotion(Context context, string speaker, string emotionName)
+        {
+            Sprite emotionSprite = null;
+            // identify emotion from the known list
+            foreach (var emotion in this.emotions)
+            {
+                emotionSprite = emotion.GetSpriteFromAlias(emotionName);
+                if (emotionSprite)
+                {
+                    break;
+                }
+            }
+            
+            // get the target of the bark from the speaker
+            var target = this.GetObjectWithName(speaker);
+            if (target == null)
+            {
+                return null;
+            }
+            var targetCanvas = target.GetComponentInChildren<EmoteCanvas>(true);
+            if (targetCanvas == null)
+            {
+                return null;
+            }
+
+            targetCanvas.Emote(emotionSprite);
+
+            return null;
+        }
         
         [MSWFunction("{0} barks: {1}")]
         public object RunBark(Context context, string speaker, string line)

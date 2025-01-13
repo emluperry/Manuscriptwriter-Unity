@@ -5,5 +5,9 @@ Matt: The Daleks will exterminate!
 
 The camera focuses on Cat.
 Matt: The Cat is an Enemy of the Daleks!
+Cat feels sad.
+Cat: ...Meow?
 The camera focuses on the player.
 Matt: Exterminate!
+Matt feels mad.
+Matt: Exterminate!!!!
