@@ -11,14 +11,14 @@ namespace Demo.Scene
     {
         [SerializeField] private EntityInitialiser player;
         [SerializeField] private PlayerController playerController;
-        [SerializeField] private FollowCamera Camera;
+        [FormerlySerializedAs("Camera")] [SerializeField] private CameraMovement cameraMovement;
 
         private void Awake()
         {
             playerController.SetupController();
             playerController.SetupPlayer(player);
             
-            Camera.SetTarget(player.transform);
+            cameraMovement.SetTarget(player.transform);
         }
     }
 }

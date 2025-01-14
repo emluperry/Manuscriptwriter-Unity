@@ -40,7 +40,7 @@ namespace MSW.Unity
                 return;
             }
             
-            this.GetRunScript(startupScript.text)?.Invoke();
+            this.GetRunScript(startupScript.text, this.gameObject.name)?.Invoke();
         }
 
         private void OnDestroy()
@@ -70,15 +70,21 @@ namespace MSW.Unity
             var actionComponents = Object.FindObjectsByType<Actions>(FindObjectsSortMode.None);
             foreach (var actionComponent in actionComponents)
             {
-                this.GetRunScript(actionComponent.ActionScript.text)?.Invoke();
+                this.GetRunScript(actionComponent.ActionScript.text, actionComponent.gameObject.name)?.Invoke();
             }
         }
 
         #region ManuscriptWriter
 
-        private Action GetRunScript(string script)
+        private Action GetRunScript(string script, string scriptName)
         {
             var manuscript = compiler.Compile(script);
+
+            if (manuscript == null)
+            {
+                Debug.LogError($"Found an error in the actions for {scriptName} - see the log for more details");
+                return () => { };
+            }
 
             var runner = new Runner(manuscript)
             {

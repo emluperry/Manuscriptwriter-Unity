@@ -1,8 +1,5 @@
-using System;
-using MSW.Events;
 using MSW.Reflection;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace MSW.Unity.Camera
 {
@@ -24,10 +21,17 @@ namespace MSW.Unity.Camera
 
         #region MSW Functions
         
-        [MSWFunction("The camera stops moving.")]
+        [MSWFunction("The camera freezes.")]
         public object StopMovement(Context context)
         {
-            //context.WaitForEvent(continueAction);
+            currentCameraCommands?.FreezeCamera();
+            return null;
+        }
+        
+        [MSWFunction("The camera stops moving.")]
+        public object StopEffects(Context context)
+        {
+            currentCameraCommands?.StopAdditionalEffects();
             return null;
         }
         
@@ -49,7 +53,7 @@ namespace MSW.Unity.Camera
         [MSWFunction("The camera shakes from side to side.")]
         public object ShakeHorizontal(Context context)
         {
-            //context.WaitForEvent(continueAction);
+            currentCameraCommands.StartCameraShake();
             return null;
         }
 
@@ -57,7 +61,7 @@ namespace MSW.Unity.Camera
 
         public override void Cleanup()
         {
-            
+            currentCameraCommands?.StopAdditionalEffects();
         }
     }
 }

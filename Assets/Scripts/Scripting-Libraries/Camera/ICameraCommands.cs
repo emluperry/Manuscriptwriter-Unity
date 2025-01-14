@@ -6,5 +6,9 @@ namespace MSW.Unity.Camera
     {
         void SetTarget(Transform target);
         void SetTargets(Transform[] targets);
+        void FreezeCamera();
+
+        void StartCameraShake();
+        void StopAdditionalEffects();
     }
 }

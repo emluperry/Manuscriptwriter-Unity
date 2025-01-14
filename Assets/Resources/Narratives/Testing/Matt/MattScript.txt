@@ -1,4 +1,6 @@
 When the player speaks with Matt
+The camera focuses on the player.
+
 Matt barks: <color="red>EXTERMINATE!</color>
 Matt barks: EXTERMINATE!!!!!!
 Matt: The Daleks will exterminate!
@@ -8,6 +10,8 @@ Matt: The Cat is an Enemy of the Daleks!
 Cat feels sad.
 Cat: ...Meow?
 The camera focuses on the player.
+The camera shakes from side to side.
 Matt: Exterminate!
 Matt feels mad.
+The camera stops moving.
 Matt: Exterminate!!!!

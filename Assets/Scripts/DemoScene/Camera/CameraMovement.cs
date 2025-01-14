@@ -1,11 +1,13 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using MSW.Unity.Camera;
 using UnityEngine;
 
 namespace Demo.Camera
 {
-    public class FollowCamera : MonoBehaviour, ICameraCommands
+    public class CameraMovement : MonoBehaviour, ICameraCommands
     {
         [Header("Movement")]
         [SerializeField] private float cameraSpeed = 5f;
@@ -20,6 +22,7 @@ namespace Demo.Camera
         [SerializeField] private float zoomStoppingOffset = 1f;
 
         [SerializeField] private Transform[] targets;
+        private List<ICameraModifier> modifiers = new List<ICameraModifier>();
         private Coroutine camCoroutine;
         private UnityEngine.Camera Camera;
 
@@ -49,12 +52,29 @@ namespace Demo.Camera
             this.SetTargets(new Transform[] { target });
         }
 
+        public virtual void FreezeCamera()
+        {
+            this.StopCameraMovement();
+        }
+
         public virtual void SetTargets(Transform[] targets)
         {
             this.targets = targets;
 
             this.StartCameraMovement();
         }
+
+        #region ADDITIONAL EFFECTS
+        public void StartCameraShake()
+        {
+            this.modifiers.Add(new HorizontalCameraShake());
+        }
+
+        public void StopAdditionalEffects()
+        {
+            this.modifiers.Clear();
+        }
+        #endregion
 
         private IEnumerator c_CameraCoroutine()
         {
@@ -79,10 +99,17 @@ namespace Demo.Camera
         {
             targetPosition = this.CalculateTargetCentre();
             Vector3 realPosition = targetPosition + distanceOffset;
-
             float cameraDistance = cameraSpeed * Time.fixedDeltaTime;
+            
+            var modifiedPosition = Vector3.MoveTowards(transform.position, realPosition, cameraDistance);
+            
+            // apply additional effects
+            foreach (var modifier in modifiers)
+            {
+                modifiedPosition = modifier.ModifyCameraPosition(modifiedPosition);
+            }
 
-            return Vector3.MoveTowards(transform.position, realPosition, cameraDistance);
+            return modifiedPosition;
         }
 
         private float ZoomCamera(Vector3 targetPosition)
@@ -97,7 +124,15 @@ namespace Demo.Camera
                 return fullZoom;
             }
 
-            return this.Camera.fieldOfView + ((1/totalDeltaZoom) * zoomSpeed * Time.fixedDeltaTime);
+            var modifiedZoom = this.Camera.fieldOfView + ((1/totalDeltaZoom) * zoomSpeed * Time.fixedDeltaTime);
+            
+            // apply additional effects
+            foreach (var modifier in modifiers)
+            {
+                modifiedZoom = modifier.ModifyCameraZoom(modifiedZoom);
+            }
+            
+            return modifiedZoom;
         }
 
         private Vector3 CalculateTargetCentre()
