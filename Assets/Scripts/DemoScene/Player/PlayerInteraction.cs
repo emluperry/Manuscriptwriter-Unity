@@ -73,7 +73,10 @@ namespace Demo.Player
 
         private void HandleInteraction(InputAction.CallbackContext obj)
         {
-            this.target.StartInteract("the player");
+            if (this.target)
+            {
+                this.target.StartInteract("the player");
+            }
         }
     }
 }

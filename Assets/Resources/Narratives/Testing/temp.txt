@@ -13,8 +13,7 @@ for var i = 0, i <= 10, i = i + 1, print true
 Emily: Hello world!
 Adam: Hello 2!
 
-The camera freezes.
-# Disables all camera movement.
-
 var strValue = "hello world! This is a test."
 print strValue
+
+The camera freezes.

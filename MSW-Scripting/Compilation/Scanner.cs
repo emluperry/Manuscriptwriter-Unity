@@ -66,6 +66,7 @@ namespace MSW.Compiler
             switch (currentToken.type)
             {
                 case TokenType.UNIDENTIFIED: // Get the full line as a function and return.
+                    currentIndex = 0;
                     tokens.Add(this.ConvertLineToToken(TokenType.FUNCTION));
                     return tokens;
                 
@@ -77,7 +78,8 @@ namespace MSW.Compiler
                     {
                         break;
                     }
-                    tokens.Add(this.ConvertLineToToken(TokenType.EVENT, currentIndex));
+                    startIndex = currentIndex;
+                    tokens.Add(this.ConvertLineToToken(TokenType.EVENT));
                     return tokens;
                 
                 case TokenType.IDENTIFIER: // check for = token. If it doesn't exist, this isn't an assignment, so no point keeping it standalone.
@@ -88,6 +90,7 @@ namespace MSW.Compiler
                     if (currentToken.type != TokenType.EQUAL)
                     {
                         // Get the full line as a token and return.
+                        currentIndex = 0;
                         tokens.Add(this.ConvertLineToToken(TokenType.FUNCTION));
                         return tokens;
                     }
@@ -176,12 +179,6 @@ namespace MSW.Compiler
 
             char c = this.PopCharacter();
             
-            // Check previous tokens.
-            if (previousToken.type == TokenType.COLON)
-            {
-                return this.GetStringToken('\n', true);
-            }
-            
             // Check for non-char values.
             if (this.IsAlpha(c)) return this.GetIdentifierToken(c, previousToken);
             if (this.IsDigit(c)) return this.GetNumberToken();
@@ -207,14 +204,26 @@ namespace MSW.Compiler
             return this.ErrorToken("Unexpected character.");
         }
 
-        private Token ConvertLineToToken(TokenType type, int start = -1)
+        private Token ConvertLineToToken(TokenType type)
         {
-            if (start == -1)
+            while (!this.EndOfLine())
             {
-                start = startIndex;
+                char nextCharacter = this.PeekCharacter();
+                if (nextCharacter == '\n' || nextCharacter == '\r' || nextCharacter == '\t' || nextCharacter == '#')
+                {
+                    break;
+                }
+
+                PopCharacter();
             }
             
-            return new Token(type, currentLine.Substring(start, endIndex - 1 - start), null, line + 1);
+            // trim trailing spaces
+            while (this.PeekPreviousCharacter() == ' ')
+            {
+                currentIndex--;
+            }
+            
+            return new Token(type, currentLine.Substring(startIndex, currentIndex - startIndex), null, line + 1);
         }
 
         private Token MakeToken(TokenType type, object literal = null)
@@ -357,29 +366,17 @@ namespace MSW.Compiler
                    c == '_';
         }
         
-        private Token GetStringToken(char endChar = '"', bool trimLeadingSpaces = false)
+        private Token GetStringToken()
         {
-            char nextCharacter = this.PeekCharacter();
-
-            if (trimLeadingSpaces)
+            while (!this.EndOfLine())
             {
-                while (nextCharacter == ' ' && !this.EndOfLine())
-                {
-                    startIndex++;
-                    PopCharacter();
-                    nextCharacter = PeekCharacter();
-                }
-            }
-            
-            while (nextCharacter != endChar && !this.EndOfLine())
-            {
-                if (nextCharacter == '\n' || nextCharacter == '\r')
+                char nextCharacter = this.PeekCharacter();
+                if (nextCharacter == '"' || nextCharacter == '\n' || nextCharacter == '\r')
                 {
                     break;
                 }
 
                 PopCharacter();
-                nextCharacter = PeekCharacter();
             }
 
             if(PeekCharacter() == '"')
@@ -439,6 +436,11 @@ namespace MSW.Compiler
         private char PeekCharacter()
         {
             return this.currentLine[this.currentIndex];
+        }
+
+        private char PeekPreviousCharacter()
+        {
+            return currentIndex - 1 >= 0 ? this.currentLine[this.currentIndex - 1] : '\0';
         }
 
         private char PeekNextCharacter()
