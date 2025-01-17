@@ -6,7 +6,7 @@ namespace MSW.Unity
 {
     public class Actions : MonoBehaviour
     {
-        [SerializeField] [SearchContext("ext:txt dir:Resources")] // QOL: Limit the files to ONLY project text files within Resources. 
+        [SerializeField] [SearchContext("ext:txt dir:Assets/Resources")] // QOL: Limit the files to ONLY project text files within Resources. 
         private TextAsset actionScript;
         
         public TextAsset ActionScript => actionScript;

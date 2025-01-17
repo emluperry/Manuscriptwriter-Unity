@@ -1,6 +1,7 @@
 When the player speaks with Matt
 The camera focuses on the player.
 
+# Unity uses rich text to display text by default. You can change the colour of text displayed in both 'barks' and dialogue using rich text tags.
 Matt barks: <color="red>EXTERMINATE!</color>
 Matt barks: EXTERMINATE!!!!!!
 Matt: The Daleks will exterminate!
@@ -9,9 +10,10 @@ The camera focuses on Cat.
 Matt: The Cat is an Enemy of the Daleks!
 Cat feels sad.
 Cat: ...Meow?
+
 The camera focuses on the player.
 The camera shakes from side to side.
 Matt: Exterminate!
 Matt feels mad.
-The camera stops moving.
+The camera stops shaking.
 Matt: Exterminate!!!!

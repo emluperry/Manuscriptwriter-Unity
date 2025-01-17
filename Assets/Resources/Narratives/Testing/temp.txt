@@ -1,19 +1,4 @@
-var a = 20
-var b = 5
-var c = 1
-c = a + b
-print c
+# Because the following scene is not part of an interaction event, it plays out on pressing play.
 
-IF a is 20 and b is 5, print true
-ELSE, print false
-
-for var i = 0, i <= 10, i = i + 1, print true
-
-# Emily walks to the middle of the room
 Emily: Hello world!
-Adam: Hello 2!
-
-var strValue = "hello world! This is a test."
-print strValue
-
-The camera freezes.
+Emily: Welcome to the demo!

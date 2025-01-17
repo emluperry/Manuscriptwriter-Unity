@@ -28,7 +28,7 @@ namespace MSW.Unity.Camera
             return null;
         }
         
-        [MSWFunction("The camera stops moving.")]
+        [MSWFunction("The camera stops shaking.")]
         public object StopEffects(Context context)
         {
             currentCameraCommands?.StopAdditionalEffects();
