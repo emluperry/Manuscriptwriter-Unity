@@ -1,0 +1,17 @@
+{
+    "name": "MSW-Unity-Camera",
+    "rootNamespace": "MSW.Unity.Camera",
+    "references": [
+        "GUID:9dfc29c3bbd2ee844a9ccd296fc26188",
+        "GUID:99e218a9cf2639b4d95d86b2f82d4ca7"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

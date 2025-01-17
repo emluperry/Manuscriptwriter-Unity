@@ -15,3 +15,5 @@ Adam: Hello 2!
 
 var strValue = "hello world! This is a test."
 print strValue
+
+The camera freezes.

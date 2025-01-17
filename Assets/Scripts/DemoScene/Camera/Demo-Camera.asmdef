@@ -1,7 +1,9 @@
 {
     "name": "Demo-Camera",
     "rootNamespace": "Demo.Camera",
-    "references": [],
+    "references": [
+        "GUID:3a6d05c795ff7d148b3249f01c3bd489"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

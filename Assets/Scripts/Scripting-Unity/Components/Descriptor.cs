@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Demo.Interaction
+namespace MSW.Unity
 {
     public class Descriptor : MonoBehaviour
     {

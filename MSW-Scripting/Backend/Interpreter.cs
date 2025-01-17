@@ -107,6 +107,8 @@ namespace MSW.Scripting
 
                         if (!this.environmentStack.Any())
                         {
+                            // Ensure the global environment is always present on the stack, as this allows global variables to be accessed.
+                            this.environmentStack.Push(currentEnv);
                             this.IsFinished = true;
                             this.OnFinish?.Invoke();
                             return false;

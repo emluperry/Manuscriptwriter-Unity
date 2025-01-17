@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 371081853153534272}
-  - component: {fileID: 8808811340971284210}
   m_Layer: 0
   m_Name: UI-Manager
   m_TagString: Untagged
@@ -34,18 +33,6 @@ Transform:
   - {fileID: 4079467798854483526}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8808811340971284210
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6814638802757393702}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d47f7903ba85c754d8247e5194176dcb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &2907165668163476846
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -116,6 +103,34 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 371081853153534272}
     m_Modifications:
+    - target: {fileID: 2219549620445459727, guid: 438bc41189d578c43b73ae4ca519b394, type: 3}
+      propertyPath: emotions.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2219549620445459727, guid: 438bc41189d578c43b73ae4ca519b394, type: 3}
+      propertyPath: 'emotions.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: e6be263982af6fd4e96f437d5c21fa5b, type: 2}
+    - target: {fileID: 2219549620445459727, guid: 438bc41189d578c43b73ae4ca519b394, type: 3}
+      propertyPath: 'emotions.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: ddab55127210fa34ab0c5b1867b635fc, type: 2}
+    - target: {fileID: 2219549620445459727, guid: 438bc41189d578c43b73ae4ca519b394, type: 3}
+      propertyPath: 'emotions.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 9dd155ae4aab218498208e0a1cb39398, type: 2}
+    - target: {fileID: 2219549620445459727, guid: 438bc41189d578c43b73ae4ca519b394, type: 3}
+      propertyPath: 'emotions.Array.data[3]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 3c383174fc6f2c74b9072e5d9f417cca, type: 2}
+    - target: {fileID: 2219549620445459727, guid: 438bc41189d578c43b73ae4ca519b394, type: 3}
+      propertyPath: 'emotions.Array.data[4]'
+      value: 
+      objectReference: {fileID: 11400000, guid: c3279cf6bd65cbb42bb4acdd58bdac43, type: 2}
+    - target: {fileID: 2219549620445459727, guid: 438bc41189d578c43b73ae4ca519b394, type: 3}
+      propertyPath: 'emotions.Array.data[5]'
+      value: 
+      objectReference: {fileID: 11400000, guid: a39ce1dd44a36c7409daf22bff6724af, type: 2}
     - target: {fileID: 7689324829422536704, guid: 438bc41189d578c43b73ae4ca519b394, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

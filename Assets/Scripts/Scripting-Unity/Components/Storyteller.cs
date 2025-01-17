@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Search;
 
@@ -15,6 +16,8 @@ namespace MSW.Unity
         
         [Header("Storyteller Commands")]
         [SerializeField] private MSWUnityLibrary[] libraries;
+
+        private Dictionary<string, Descriptor> actors;
         
         private Compiler.Compiler compiler;
         
@@ -26,7 +29,8 @@ namespace MSW.Unity
                 FunctionLibrary = libraries,
             };
             
-            this.RegisterSceneObjects();
+            this.SetupLibraries();
+            this.SetupSceneObjects();
         }
 
         private void Start()
@@ -36,7 +40,7 @@ namespace MSW.Unity
                 return;
             }
             
-            this.GetRunScript(startupScript.text)?.Invoke();
+            this.GetRunScript(startupScript.text, this.gameObject.name)?.Invoke();
         }
 
         private void OnDestroy()
@@ -44,20 +48,43 @@ namespace MSW.Unity
             this.CleanupOnFinish();
         }
 
-        private void RegisterSceneObjects()
+        private void SetupLibraries()
         {
-            // Get all Action components within the scene.
-            var actionComponents = Object.FindObjectsByType<Actions>(FindObjectsSortMode.None);
-
-            foreach (var actionComponent in actionComponents)
+            foreach (var library in libraries)
             {
-                this.GetRunScript(actionComponent.ActionScript.text)?.Invoke();
+                library.GetObjectWithName = this.GetObjectWithName;
             }
         }
 
-        private Action GetRunScript(string script)
+        private void SetupSceneObjects()
+        {
+            this.actors = new Dictionary<string, Descriptor>();
+            
+            var objects = Object.FindObjectsByType<Descriptor>(FindObjectsSortMode.None);
+            foreach (var obj in objects)
+            {
+                this.actors[obj.ObjectName] = obj;
+            }
+            
+            // Get all Action components within the scene.
+            var actionComponents = Object.FindObjectsByType<Actions>(FindObjectsSortMode.None);
+            foreach (var actionComponent in actionComponents)
+            {
+                this.GetRunScript(actionComponent.ActionScript.text, actionComponent.gameObject.name)?.Invoke();
+            }
+        }
+
+        #region ManuscriptWriter
+
+        private Action GetRunScript(string script, string scriptName)
         {
             var manuscript = compiler.Compile(script);
+
+            if (manuscript == null)
+            {
+                Debug.LogError($"Found an error in the actions for {scriptName} - see the log for more details");
+                return () => { };
+            }
 
             var runner = new Runner(manuscript)
             {
@@ -80,6 +107,17 @@ namespace MSW.Unity
                 library.Cleanup();
             }
         }
+
+        #endregion
+
+        #region Utilities
+
+        private Descriptor GetObjectWithName(string name)
+        {
+            return this.actors.GetValueOrDefault(name);
+        }
+
+        #endregion
 
         #region DEBUGGING
         
