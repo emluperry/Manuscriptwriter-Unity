@@ -281,7 +281,7 @@ PrefabInstance:
     - target: {fileID: 4161803580467368168, guid: b5f53a233eb90a44caeb18847b61b1e3, type: 3}
       propertyPath: actionScript
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 4900000, guid: c6965c5ceb3de0c4998dfecd6d2966ff, type: 3}
     - target: {fileID: 5345615517246942783, guid: b5f53a233eb90a44caeb18847b61b1e3, type: 3}
       propertyPath: name
       value: Cat
