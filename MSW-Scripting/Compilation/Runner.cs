@@ -39,12 +39,12 @@ namespace MSW.Compiler
 
         private void ReportRuntimeError(MSWRuntimeException ex)
         {
-            this.Report(ex.operatorToken.line, "", ex.Message);
+            this.Report(ex.operatorToken.line, ex.operatorToken.lexeme, ex.Message);
         }
 
         private void Report(int line, string where, string message)
         {
-            Logger?.Invoke($"ERROR: [Line {line} - {where}]: {message}");
+            Logger?.Invoke($"[ManuScriptwriter] ERROR: [Line {line} - {where}]: {message}");
         }
     }
 }

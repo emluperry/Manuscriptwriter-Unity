@@ -301,7 +301,7 @@ namespace MSW.Compiler
 
         private Statement VarDeclaration()
         {
-            Token token = this.ConsumeToken(TokenType.IDENTIFIER, "Expect variable name.");
+            Token token = this.ConsumeToken(TokenType.IDENTIFIER, "[ManuScriptwriter] After the 'var' keyword, a name for the new variable was expected.");
 
             Expression initialiser = null;
             if (this.TryConsumeToken(TokenType.EQUAL, out Token equals))
@@ -309,7 +309,7 @@ namespace MSW.Compiler
                 initialiser = this.Expression();
             }
 
-            this.ConsumeOneOfTokens(new List<TokenType> { TokenType.COMMA, TokenType.EOL, TokenType.EOF }, "Expect end of line after variable declaration.");
+            this.ConsumeOneOfTokens(new List<TokenType> { TokenType.COMMA, TokenType.EOL, TokenType.EOF }, "[ManuScriptwriter] After creating a new variable, move to a new line.");
             return new VarDeclaration(token, initialiser);
         }
 
@@ -346,7 +346,7 @@ namespace MSW.Compiler
         private Statement ExpressionStatement()
         {
             Expression value = this.Expression();
-            this.ConsumeOneOfTokens(new List<TokenType> { TokenType.COMMA, TokenType.EOL, TokenType.EOF }, "Expect end of line after value.");
+            this.ConsumeOneOfTokens(new List<TokenType> { TokenType.COMMA, TokenType.EOL, TokenType.EOF }, "[ManuScriptwriter] Expected the line to end - make sure each sentence is on its own line.");
             return new StatementExpression(value);
         }
         
@@ -354,14 +354,14 @@ namespace MSW.Compiler
         {
             if (!this.TryConsumeToken(TokenType.EVENT, out Token eventToken))
             {
-                throw this.ParseError(eventToken, "When must be followed by an event!");
+                throw this.ParseError(eventToken, "[ManuScriptwriter] Then 'When' keyword must be followed by an event! Check your spelling, and the available events.");
             }
             
             IRunnerEvent runnerEvent = this.GetEventFromLine(eventToken.lexeme, out List<string> arguments);
 
             if (runnerEvent == null)
             {
-                throw this.ParseError(eventToken, "Could not find that event! Check spelling.");
+                throw this.ParseError(eventToken, "[ManuScriptwriter] Could not find that event! Check your spelling, and the available events.");
             }
 
             List<Expression> args = new List<Expression>();
@@ -380,7 +380,7 @@ namespace MSW.Compiler
         {
             Expression condition = this.Expression();
 
-            this.ConsumeToken(TokenType.COMMA, "Expect comma after if condition.");
+            this.ConsumeToken(TokenType.COMMA, "[ManuScriptwriter] Expected a comma after the 'if' condition, in the format [If condition,].");
 
             Statement thenBranch = this.Statement();
             Statement elseBranch = null;
@@ -397,7 +397,7 @@ namespace MSW.Compiler
         private Statement WhileStatement()
         {
             Expression condition = this.Expression();
-            this.ConsumeToken(TokenType.COMMA, "Expect comma after if condition.");
+            this.ConsumeToken(TokenType.COMMA, "[ManuScriptwriter] Expected a comma after the 'while' condition, in the format [While condition,].");
             Statement statement = this.Statement();
 
             return new While(condition, statement);
@@ -417,10 +417,10 @@ namespace MSW.Compiler
             }
 
             Expression condition = this.Expression();
-            this.ConsumeToken(TokenType.COMMA, "Expect comma after loop condition.");
+            this.ConsumeToken(TokenType.COMMA, "[ManuScriptwriter] Expected a comma after the 'for' condition, in the format [For variable, condition, increment,].");
 
             Expression increment = this.Expression();
-            this.ConsumeToken(TokenType.COMMA, "Expect comma after loop increment.");
+            this.ConsumeToken(TokenType.COMMA, "[ManuScriptwriter] Expected a comma after the 'for' increment, in the format [For variable, condition, increment,].");
 
             Statement body = this.Statement();
 
@@ -444,7 +444,7 @@ namespace MSW.Compiler
         private Statement PrintStatement()
         {
             Expression value = this.Expression();
-            this.ConsumeOneOfTokens(new List<TokenType> { TokenType.EOL, TokenType.EOF }, "Expect end of line after value.");
+            this.ConsumeOneOfTokens(new List<TokenType> { TokenType.EOL, TokenType.EOF }, "[ManuScriptwriter] Expected the line to end - make sure each sentence is on its own line.");
             return new Print(value);
         }
         
@@ -485,7 +485,7 @@ namespace MSW.Compiler
                     return new Assign(token, value);
                 }
 
-                this.ParseError(equals, "Invalid assignment target.");
+                this.ParseError(equals, "[ManuScriptwriter] Tried to assign a value to an invalid variable. Check the variable exists before setting one.");
             }
 
             return expression;
@@ -588,7 +588,7 @@ namespace MSW.Compiler
 
                 if (func == null)
                 {
-                    throw this.ParseError(function, "Invalid instruction! Check spelling.");
+                    throw this.ParseError(function, "[ManuScriptwriter] Found an invalid sentence! Check the spelling and the available statements.");
                 }
 
                 List<Expression> args = new List<Expression>();
@@ -630,7 +630,7 @@ namespace MSW.Compiler
                 return new Variable(opv);
             }
 
-            throw ParseError(this.TryPeekToken(), "Expect expression.");
+            throw ParseError(this.TryPeekToken(), "[ManuScriptwriter] [Internal Error] Expected a full sentence, but couldn't find any valid options. Check your spelling and syntax.");
         }
 
         #endregion

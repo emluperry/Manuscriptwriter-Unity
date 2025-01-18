@@ -85,7 +85,7 @@ namespace MSW.Unity
 
             if (manuscript == null)
             {
-                Debug.LogError($"Found an error in the actions for {scriptName} - see the log for more details");
+                Debug.LogError($"Found an error in the actions for {scriptName} - check the previous messages in the console for more details!");
                 return () => { };
             }
 
