@@ -75,7 +75,7 @@ namespace Demo.Player
         {
             if (this.target)
             {
-                this.target.StartInteract("the player");
+                this.target.StartInteract("Player");
             }
         }
     }

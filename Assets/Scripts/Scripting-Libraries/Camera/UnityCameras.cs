@@ -35,6 +35,7 @@ namespace MSW.Unity.Camera
             return null;
         }
         
+        [MSWFunction("The camera focuses on the {0}.")]
         [MSWFunction("The camera focuses on {0}.")]
         public object FocusOnTarget(Context context, string target)
         {
