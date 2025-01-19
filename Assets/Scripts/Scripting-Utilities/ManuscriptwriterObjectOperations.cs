@@ -24,6 +24,13 @@ namespace Scripting.Editor.Utility
                 Undo.RegisterCreatedObjectUndo(newInteractable, "Create " + newInteractable.name);
             
                 Undo.RecordObject(selectionContext, $"Reparent {selectionContext.name} to {newInteractable.name}");
+                
+                // Remove the existing 'model' object from the prefab
+                var existingModel = newInteractable.transform.Find("Model").gameObject;
+                if (existingModel)
+                {
+                    Object.DestroyImmediate(existingModel);
+                }
             
                 // Reparent selection to the interactable object
                 var currentPosition = selectionContext.transform.position;
