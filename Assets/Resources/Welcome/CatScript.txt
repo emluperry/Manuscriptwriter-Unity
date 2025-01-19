@@ -1,0 +1,6 @@
+# The following is a simple event.
+# "When the player speaks with x" runs every time a valid interaction occurs. If "When the player speaks with the Cat" is called, it will play out the scene following that line, up until another event is described.
+
+When the Player talks to the Cat
+The Cat feels happy.
+Cat: Meows.

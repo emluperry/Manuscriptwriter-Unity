@@ -1,0 +1,4 @@
+# Because the following scene is not part of an interaction event, it plays out on pressing play.
+
+Emily: Hello world!
+Emily: Welcome to the demo!

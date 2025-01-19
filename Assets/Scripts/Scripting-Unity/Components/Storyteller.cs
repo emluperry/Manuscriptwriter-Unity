@@ -11,7 +11,7 @@ namespace MSW.Unity
     public class Storyteller : MonoBehaviour
     {
         [Header("Run on Start")]
-        [SerializeField] [SearchContext("ext:txt dir:Resources")] // QOL: Limit the files to ONLY project text files within Resources. 
+        [SerializeField] [SearchContext("ext:txt dir:Assets/Resources")] // QOL: Limit the files to ONLY project text files within Resources. 
         private TextAsset startupScript;
         
         [Header("Storyteller Commands")]
@@ -70,7 +70,10 @@ namespace MSW.Unity
             var actionComponents = Object.FindObjectsByType<Actions>(FindObjectsSortMode.None);
             foreach (var actionComponent in actionComponents)
             {
-                this.GetRunScript(actionComponent.ActionScript.text, actionComponent.gameObject.name)?.Invoke();
+                if (actionComponent.ActionScript)
+                {
+                    this.GetRunScript(actionComponent.ActionScript.text, actionComponent.gameObject.name)?.Invoke();
+                }
             }
         }
 
@@ -82,7 +85,7 @@ namespace MSW.Unity
 
             if (manuscript == null)
             {
-                Debug.LogError($"Found an error in the actions for {scriptName} - see the log for more details");
+                Debug.LogError($"Found an error in the actions for {scriptName} - check the previous messages in the console for more details!");
                 return () => { };
             }
 

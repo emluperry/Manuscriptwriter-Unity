@@ -209,7 +209,7 @@ namespace MSW.Scripting
                 return;
             }
 
-            throw new MSWRuntimeException(op, $"Operand {(operand != null ? operand.ToString() : string.Empty)} must be a number.");
+            throw new MSWRuntimeException(op, $"[ManuScriptwriter] Expected a number - instead found {(operand != null ? operand.ToString() : string.Empty)}. Numbers have to be numeric, i.e. 4, rather than four. Check your syntax.");
         }
         #endregion
 
@@ -267,7 +267,7 @@ namespace MSW.Scripting
                         return ls + rs;
                     }
 
-                    throw new MSWRuntimeException(visitor.op, "Operands must be two numbers or two strings.");
+                    throw new MSWRuntimeException(visitor.op, "[ManuScriptwriter] Tried to add two values of different types! Operands must be two numbers (i.e. 4, not four) or two strings.");
 
                 // COMPARISON
                 case TokenType.GREATER:

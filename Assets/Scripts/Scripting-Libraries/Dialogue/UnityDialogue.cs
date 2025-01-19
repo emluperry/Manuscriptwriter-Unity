@@ -16,7 +16,10 @@ namespace MSW.Unity.Dialogue
 
         #region MSW Events
         
-        [MSWEvent("{0} speaks with {1}")]
+        [MSWEvent("the {0} speaks with {1}")]
+        [MSWEvent("the {0} talks to the {1}")]
+        [MSWEvent("the {0} talks to {1}")]
+        [MSWEvent("the {0} interacts with the {1}")]
         public UnityMSWEvent interactionEvent;
 
         #endregion
@@ -29,6 +32,7 @@ namespace MSW.Unity.Dialogue
 
         #region MSW Functions
 
+        [MSWFunction("The {0} feels {1}.")]
         [MSWFunction("{0} feels {1}.")]
         public object RunEmotion(Context context, string speaker, string emotionName)
         {
@@ -60,6 +64,7 @@ namespace MSW.Unity.Dialogue
             return null;
         }
         
+        [MSWFunction("The {0} barks: {1}")]
         [MSWFunction("{0} barks: {1}")]
         public object RunBark(Context context, string speaker, string line)
         {

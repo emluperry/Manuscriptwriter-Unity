@@ -54,22 +54,7 @@ namespace MSW.Scripting
                 return enclosing.Get(token);
             }
             
-            throw new MSWRuntimeException(token, $"Undefined variable {token.lexeme}.");
-        }
-
-        public object Get(string lexeme)
-        {
-            if(variables.ContainsKey(lexeme))
-            {
-                return variables[lexeme];
-            }
-
-            if(this.enclosing != null)
-            {
-                return enclosing.Get(lexeme);
-            }
-
-            throw new MSWRuntimeException(null, $"Undefined variable {lexeme}.");
+            throw new MSWRuntimeException(token, $"[ManuScriptwriter] Tried to get a variable that hasn't been defined! See: {token.lexeme}.");
         }
 
         public void Assign(Token token, object value)
@@ -86,7 +71,7 @@ namespace MSW.Scripting
                 return;
             }
 
-            throw new MSWRuntimeException(token, $"Undefined variable {token.lexeme}.");
+            throw new MSWRuntimeException(token, $"[ManuScriptwriter] Tried to change a variable that hasn't been defined! See: {token.lexeme}.");
         }
         #endregion
     }

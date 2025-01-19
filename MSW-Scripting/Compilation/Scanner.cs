@@ -60,7 +60,7 @@ namespace MSW.Compiler
             }
 
             // Check first token.
-            Token previousToken = ErrorToken("Previous token does not exist.");
+            Token previousToken = ErrorToken("[Internal Error] The previous token was accessed before being initialised.");
             Token currentToken = this.ScanToken(previousToken);
 
             switch (currentToken.type)
@@ -201,7 +201,7 @@ namespace MSW.Compiler
                 case '"': return this.GetStringToken();
             }
 
-            return this.ErrorToken("Unexpected character.");
+            return this.ErrorToken("[ManuScriptwriter] Found an unexpected character! Did you mis-type something?");
         }
 
         private Token ConvertLineToToken(TokenType type)
