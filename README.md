@@ -4,7 +4,9 @@ Hi! If you've been sent this link, you've agreed to take part in the testing for
 
 To get started, if you are unfamiliar with Github, click on the green Code button, then Download ZIP.
 
-While you wait for that to download, take a look at the "Manu-Scriptwriter Testing Manual" pdf for more information on how to set everything up, including Unity. You can preview this file through Github or download it separately.
+While you wait for that to download, take a look at the "Manu-Scriptwriter Testing Manual" pdf for more information on how to set everything up, including Unity. You can preview this file through Github or download it separately, but I recommend the latter.
+
+Github's PDF viewer has a button to view 'More Pages' at the bottom of the webpage, if it seems like something is missing.
 
 This guide also contains some basic information for navigating the folders, and includes all of the available commands/valid sentences.
 
