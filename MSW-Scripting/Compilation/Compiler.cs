@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MSW.Scripting;
 
 namespace MSW.Compiler
@@ -16,12 +17,22 @@ namespace MSW.Compiler
         public Manuscript Compile(string source)
         {
             hasError = false;
-            scanner = new Scanner(source);
+            IEnumerable<Statement> statements = Enumerable.Empty<Statement>();
 
-            List<Token> tokens = scanner.ScanLines();
+            try
+            {
+                scanner = new Scanner(source);
 
-            parser = new Parser(tokens, FunctionLibrary) { ReportTokenError = ReportTokenError };
-            IEnumerable<Statement> statements = parser.Parse();
+                List<Token> tokens = scanner.ScanLines();
+
+                parser = new Parser(tokens, FunctionLibrary) { ReportTokenError = ReportTokenError };
+                statements = parser.Parse();
+            }
+            catch(Exception e)
+            {
+                this.ErrorLogger($"[Internal Error] {e.Message}");
+                hasError = true;
+            }
 
             if(hasError)
             {
