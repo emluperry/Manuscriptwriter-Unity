@@ -140,8 +140,7 @@ namespace MSW.Compiler
 
         private void SkipWhitespace()
         {
-            bool breakLoop = false;
-            while (!breakLoop)
+            while (!this.EndOfLine())
             {
                 char c = this.PeekCharacter();
                 switch (c)
@@ -153,7 +152,6 @@ namespace MSW.Compiler
                     case '\r':
                     case '\n':
                         this.PopCharacter();
-                        breakLoop = true;
                         return;
                     case '#':
                         while (!this.EndOfLine() && this.PeekCharacter() != '\n')
@@ -161,10 +159,8 @@ namespace MSW.Compiler
                             this.PopCharacter();
                         }
                         
-                        breakLoop = true;
                         return;
                     default:
-                        breakLoop = true;
                         return;
                 }
             }
