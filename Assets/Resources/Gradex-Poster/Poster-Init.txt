@@ -1,2 +1,2 @@
 Emily looks welcoming.
-Emily: Testing!
+Emily: A tool to simplify narrative scripting and cutscene writing for non-programmers!
