@@ -1,0 +1,16 @@
+{
+    "name": "MSW-Unity-Sprites",
+    "rootNamespace": "MSW.Unity.Sprites",
+    "references": [
+        "GUID:9dfc29c3bbd2ee844a9ccd296fc26188"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
