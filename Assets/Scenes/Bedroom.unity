@@ -2957,15 +2957,42 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 787550408870873835, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 6814638802757393702, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
       propertyPath: m_Name
       value: UI-Manager
+      objectReference: {fileID: 0}
+    - target: {fileID: 8063026775291079835, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8063026775291079835, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8063026775291079835, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+--- !u!114 &2540598323652887165 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1722358314935282502, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+  m_PrefabInstance: {fileID: 2540598323652887164}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6268bd6ed5cdab14fbd57c28537281bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &3750845913004876829 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5541040485814944585, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
@@ -3287,7 +3314,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4520312278280054369, guid: 5e5e679c131a0de4a9a8f9e84cb82eda, type: 3}
       propertyPath: libraries.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4520312278280054369, guid: 5e5e679c131a0de4a9a8f9e84cb82eda, type: 3}
       propertyPath: 'libraries.Array.data[0]'
@@ -3297,6 +3324,10 @@ PrefabInstance:
       propertyPath: 'libraries.Array.data[1]'
       value: 
       objectReference: {fileID: 1003917968}
+    - target: {fileID: 4520312278280054369, guid: 5e5e679c131a0de4a9a8f9e84cb82eda, type: 3}
+      propertyPath: 'libraries.Array.data[2]'
+      value: 
+      objectReference: {fileID: 2540598323652887165}
     - target: {fileID: 7929652949793290018, guid: 5e5e679c131a0de4a9a8f9e84cb82eda, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
