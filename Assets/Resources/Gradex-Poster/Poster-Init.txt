@@ -1,0 +1,2 @@
+Emily looks welcoming.
+Emily: A tool to simplify narrative scripting and cutscene writing for non-programmers!
