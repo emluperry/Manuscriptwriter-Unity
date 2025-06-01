@@ -2457,7 +2457,7 @@ PrefabInstance:
     - target: {fileID: 91278522873142137, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
       propertyPath: m_fontAsset
       value: 
-      objectReference: {fileID: 11400000, guid: ff0a0a02268e38442a6b92fee312d041, type: 2}
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
     - target: {fileID: 91278522873142137, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
       propertyPath: m_fontSizeMin
       value: 36
@@ -2465,7 +2465,7 @@ PrefabInstance:
     - target: {fileID: 91278522873142137, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -4454457938384196624, guid: ff0a0a02268e38442a6b92fee312d041, type: 2}
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
     - target: {fileID: 91278522873142137, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
       propertyPath: m_enableAutoSizing
       value: 0
@@ -2521,7 +2521,7 @@ PrefabInstance:
     - target: {fileID: 5590609320217935909, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
       propertyPath: m_fontAsset
       value: 
-      objectReference: {fileID: 11400000, guid: ff0a0a02268e38442a6b92fee312d041, type: 2}
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
     - target: {fileID: 5590609320217935909, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
       propertyPath: m_fontSizeMax
       value: 36
@@ -2529,7 +2529,7 @@ PrefabInstance:
     - target: {fileID: 5590609320217935909, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -4454457938384196624, guid: ff0a0a02268e38442a6b92fee312d041, type: 2}
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
     - target: {fileID: 5590609320217935909, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
       propertyPath: m_enableAutoSizing
       value: 0
