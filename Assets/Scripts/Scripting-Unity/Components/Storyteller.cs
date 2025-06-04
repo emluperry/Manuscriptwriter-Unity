@@ -5,6 +5,7 @@ using UnityEngine.Search;
 
 using MSW.Compiler;
 using Object = UnityEngine.Object;
+using MSW.Input;
 
 namespace MSW.Unity
 {
@@ -16,6 +17,8 @@ namespace MSW.Unity
         
         [Header("Storyteller Commands")]
         [SerializeField] private MSWUnityLibrary[] libraries;
+        [SerializeField] private GameObject choiceHandlerObject;
+        private IChoiceHandler choiceHandler;
 
         private Dictionary<string, Descriptor> actors;
         
@@ -28,6 +31,8 @@ namespace MSW.Unity
                 ErrorLogger = Logger,
                 FunctionLibrary = libraries,
             };
+
+            this.choiceHandler = choiceHandlerObject.GetComponent<IChoiceHandler>();
             
             this.SetupLibraries();
             this.SetupSceneObjects();
@@ -89,7 +94,7 @@ namespace MSW.Unity
                 return () => { };
             }
 
-            var runner = new Runner(manuscript)
+            var runner = new Runner(manuscript, this.choiceHandler)
             {
                 Logger = Logger,
                 OnFinish = CleanupOnFinish,

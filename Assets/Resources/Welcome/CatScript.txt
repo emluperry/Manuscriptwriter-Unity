@@ -4,3 +4,17 @@
 When the Player talks to the Cat
 The Cat feels happy.
 Cat: Meows.
+
+Narrator: Pet the cat?
+Pick
+- "Yes"
+Go to PET
+- "No"
+Go to WATCH
+
+Passage PET
+Player: *Pets the cat*
+Cat: Prrrrr.
+
+Passage WATCH
+Cat: Meow
