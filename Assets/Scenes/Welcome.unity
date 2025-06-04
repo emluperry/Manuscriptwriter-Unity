@@ -315,6 +315,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b5f53a233eb90a44caeb18847b61b1e3, type: 3}
+--- !u!114 &203292112 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8050553344541617664, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+  m_PrefabInstance: {fileID: 2540598323652887164}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c184f9aec6c79342b442343d1611919, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &250432091
 GameObject:
   m_ObjectHideFlags: 0
@@ -1312,6 +1323,54 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI-Manager
       objectReference: {fileID: 0}
+    - target: {fileID: 6919836542779378480, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6919836542779378480, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6919836542779378480, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6919836542779378480, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6919836542779378480, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6919836542779378480, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8009090127273659284, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8009090127273659284, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8009090127273659284, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8009090127273659284, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8009090127273659284, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8009090127273659284, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8063026775291079835, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
@@ -1601,14 +1660,6 @@ PrefabInstance:
       value: StoryTeller
       objectReference: {fileID: 0}
     - target: {fileID: 4520312278280054369, guid: 5e5e679c131a0de4a9a8f9e84cb82eda, type: 3}
-      propertyPath: startupScript
-      value: 
-      objectReference: {fileID: 4900000, guid: 064b2cc303591f444b81e06b14bdf8f3, type: 3}
-    - target: {fileID: 4520312278280054369, guid: 5e5e679c131a0de4a9a8f9e84cb82eda, type: 3}
-      propertyPath: libraries.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4520312278280054369, guid: 5e5e679c131a0de4a9a8f9e84cb82eda, type: 3}
       propertyPath: 'libraries.Array.data[0]'
       value: 
       objectReference: {fileID: 3750845913004876829}
@@ -1616,6 +1667,10 @@ PrefabInstance:
       propertyPath: 'libraries.Array.data[1]'
       value: 
       objectReference: {fileID: 1003917968}
+    - target: {fileID: 5393711852092397044, guid: 5e5e679c131a0de4a9a8f9e84cb82eda, type: 3}
+      propertyPath: canvas
+      value: 
+      objectReference: {fileID: 203292112}
     - target: {fileID: 7929652949793290018, guid: 5e5e679c131a0de4a9a8f9e84cb82eda, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

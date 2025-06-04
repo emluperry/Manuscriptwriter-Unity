@@ -1263,6 +1263,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6268bd6ed5cdab14fbd57c28537281bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2540598323652887166 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8050553344541617664, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
+  m_PrefabInstance: {fileID: 2540598323652887164}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c184f9aec6c79342b442343d1611919, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &3750845913004876829 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5541040485814944585, guid: fee9e87a6aaa7744b9c8eba7679a0ed5, type: 3}
@@ -1562,6 +1573,10 @@ PrefabInstance:
       propertyPath: 'libraries.Array.data[2]'
       value: 
       objectReference: {fileID: 2540598323652887165}
+    - target: {fileID: 5393711852092397044, guid: 5e5e679c131a0de4a9a8f9e84cb82eda, type: 3}
+      propertyPath: canvas
+      value: 
+      objectReference: {fileID: 2540598323652887166}
     - target: {fileID: 7929652949793290018, guid: 5e5e679c131a0de4a9a8f9e84cb82eda, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

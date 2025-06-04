@@ -18,6 +18,7 @@ namespace Demo.UI
             }
             
             base.UpdateCanvas(speaker, line);
+            this.EnableInput();
         }
 
         public override void CleanupCanvas()
@@ -42,16 +43,17 @@ namespace Demo.UI
 
         public void EnableInput()
         {
-            this.continueInput.performed += HandleInput_Submit;
+            this.continueInput.started += HandleInput_Submit;
         }
 
         public void DisableInput()
         {
-            this.continueInput.performed -= HandleInput_Submit;
+            this.continueInput.started -= HandleInput_Submit;
         }
         
         private void HandleInput_Submit(InputAction.CallbackContext obj)
         {
+            this.DisableInput();
             this.ContinueAction.FireEvent(this, new RunnerEventArgs(new List<object>() {obj.action.name}));
         }
         
